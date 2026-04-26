@@ -1,0 +1,13 @@
+# Mon Bouclier Numérique
+
+Site d'outils de cybersécurité gratuits spécialisé dans la protection contre le phishing et la robustesse des accès.
+
+## Outils Disponibles
+- Scanner de Scam : Analyse sémantique de SMS et Emails suspects pour détecter les tentatives d'hameçonnage.
+- Coffre-fort : Testeur de robustesse de mot de passe (local) et générateur sécurisé.
+- Alertes CERT-FR : Flux de vulnérabilités en temps réel fourni par l'ANSSI.
+
+## Navigation
+- Accueil : https://project-sokwk.vercel.app
+- Analyse Fichier : Redirection vers VirusTotal
+- Vérification Fuite : Redirection vers HaveIBeenPwned
