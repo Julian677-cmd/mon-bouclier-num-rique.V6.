@@ -37,8 +37,8 @@ const ScamAI = () => {
         { regex: /(vite|urgent|immédiat|24h|dernière chance|expire|sommation|action requise)/g, points: 25, tag: "Pression temporelle" },
         { regex: /(gagné|cadeau|lot|gain|remboursement|bravo|félicitations|héritage|euro|€)/g, points: 30, tag: "Appât financier" },
         { regex: /(ameli|impots|gouv|banque|caf|netflix|chronopost|ups|amazon|compte bloqué)/g, points: 25, tag: "Usurpation de marque" },
-        { regex: /(cliquez|lien|connectez-vous|vérifier|clic|ici|http|bit\.ly|t\.co|https:\/\/)/g, points: 20, tag: "Lien suspect" },
-        { regex: /(mandat|transcash|pcs|coupon|ne dites rien|discrétion|recharge)/g, points: 35, tag: "Paiement anonyme" },
+        { regex: /(cliquez|lien|connectez-vous|vérifier|click|ici|http|bit\.ly|t\.co|https:\/\/)/g, points: 20, tag: "Lien suspect" },
+        { regex: /(mandat|transcash|pcs|coupons|ne dites rien|discrétion|recharge)/g, points: 35, tag: "Paiement anonyme" },
         { regex: /(identifiant|mot de passe|password|cb|carte bleue|numéro|sécurité)/g, points: 15, tag: "Extraction de données" }
       ];
 
@@ -119,7 +119,7 @@ const ScamAI = () => {
   );
 };
 
-// --- 3. COFFRE-FORT MOTS DE PASSE ---
+// --- 3. COFFRE-FORT MOTS DE PASSE (Sécurisé par Crypto API) ---
 const PasswordTool = () => {
   const [pass, setPass] = useState("");
   const [generated, setGenerated] = useState("");
@@ -138,7 +138,12 @@ const PasswordTool = () => {
 
   const generatePass = () => {
     const chars = "ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%^&*()";
-    let res = ""; for (let i = 0; i < 16; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
+    const array = new Uint32Array(16);
+    window.crypto.getRandomValues(array);
+    let res = "";
+    for (let i = 0; i < 16; i++) {
+      res += chars.charAt(array[i] % chars.length);
+    }
     setGenerated(res);
   };
 
