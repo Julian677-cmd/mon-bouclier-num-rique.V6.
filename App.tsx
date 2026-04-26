@@ -20,14 +20,13 @@ const Breadcrumbs = () => (
 
 const ScamAI = () => {
   const [text, setText] = useState("");
-  const [analysis, setAnalysis] = useState<{score: number, advice: string, level: string, color: string, flags: string[]} | null>(null);
+  const [analysis, setAnalysis] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
   const analyzeReal = async () => {
     if (!text.trim() || text.length < 10) return;
     setLoading(true);
     try {
-      // IA LOCALE : Utilisation de Transformers.js pour analyser le texte
       const classifier = await pipeline('text-classification', 'Xenova/distilbert-base-uncased-finetuned-sst-2-english');
       const result = await classifier(text);
       
@@ -36,10 +35,10 @@ const ScamAI = () => {
 
       setAnalysis({
         score: isSuspect ? score : 100 - score,
-        level: isSuspect ? (score > 80 ? "CRITIQUE" : "MODÉRÉ") : "FAIBLE",
-        color: isSuspect ? (score > 80 ? "text-red-600" : "text-orange-500") : "text-green-600",
+        level: isSuspect ? "CRITIQUE" : "FAIBLE",
+        color: isSuspect ? "text-red-600" : "text-green-600",
         advice: isSuspect 
-          ? "🚨 DANGER : L'IA locale détecte des indices de phishing. Ne partagez aucune donnée !"
+          ? "🚨 DANGER : L'IA détecte des indices de phishing. Ne partagez aucune donnée !"
           : "✅ SAIN : L'IA n'a pas détecté de menace immédiate. Restez tout de même vigilant.",
         flags: ["IA Locale", isSuspect ? "Analyse Sémantique" : "Vérifié"]
       });
@@ -75,7 +74,7 @@ const ScamAI = () => {
       {analysis && (
         <div className="mt-6 p-5 bg-gray-100 rounded-2xl border-2 border-black animate-in fade-in zoom-in">
           <div className="flex justify-between items-center mb-3">
-            <span className="text-[10px] font-black uppercase text-gray-500">Probabilité d'arnaque :</span>
+            <span className="text-[10px] font-black uppercase text-gray-500">Analyse :</span>
             <span className={`font-black uppercase italic ${analysis.color}`}>{analysis.level} ({analysis.score}%)</span>
           </div>
           <p className="font-bold text-sm text-left mb-4">{analysis.advice}</p>
@@ -91,17 +90,6 @@ const ScamAI = () => {
 const PasswordTool = () => {
   const [pass, setPass] = useState("");
   const [generated, setGenerated] = useState("");
-  const checkStrength = () => {
-    if (!pass) return { score: 0, text: "Vide", color: "bg-gray-200" };
-    let s = 0;
-    if (pass.length > 10) s += 25;
-    if (/[A-Z]/.test(pass)) s += 25;
-    if (/[0-9]/.test(pass)) s += 25;
-    if (/[^A-Za-z0-9]/.test(pass)) s += 25;
-    if (s > 75) return { score: s, text: "Excellent", color: "bg-green-500" };
-    if (s > 40) return { score: s, text: "Moyen", color: "bg-yellow-500" };
-    return { score: s, text: "Faible", color: "bg-red-500" };
-  };
   const generatePass = () => {
     const chars = "ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%^&*()";
     const array = new Uint32Array(16);
@@ -110,14 +98,11 @@ const PasswordTool = () => {
     for (let i = 0; i < 16; i++) { res += chars.charAt(array[i] % chars.length); }
     setGenerated(res);
   };
-  const strength = checkStrength();
   return (
     <section className="bg-black p-6 md:p-8 rounded-[2.5rem] text-white shadow-2xl">
       <h2 className="font-black italic uppercase text-2xl mb-6 flex items-center gap-3 text-left">Le Coffre-Fort <Key className="text-blue-400"/></h2>
       <div className="space-y-4">
         <input type="text" className="w-full p-4 bg-zinc-900 border-2 border-zinc-700 rounded-2xl font-mono text-blue-400 text-base focus:border-blue-500 outline-none" placeholder="Testez un mot de passe..." value={pass} onChange={(e) => setPass(e.target.value)} />
-        <div className="h-2 bg-zinc-800 rounded-full overflow-hidden"><div className={`h-full transition-all duration-500 ${strength.color}`} style={{ width: `${strength.score}%` }} /></div>
-        <p className="text-[10px] font-black uppercase text-zinc-500 text-left">Force : {strength.text}</p>
         <button onClick={generatePass} className="w-full py-4 bg-blue-600 rounded-xl font-black uppercase text-xs hover:bg-blue-400 transition-all shadow-lg active:scale-95">Générer un mot de passe sûr</button>
         {generated && <div className="mt-4 p-3 bg-white text-black rounded-lg font-mono text-center text-sm cursor-pointer hover:bg-gray-100" onClick={() => navigator.clipboard.writeText(generated)}>{generated} <span className="text-[8px] block opacity-50 mt-1 uppercase">(Cliquer pour copier)</span></div>}
       </div>
@@ -128,16 +113,15 @@ const PasswordTool = () => {
 const NewsFeed = () => {
   const [news, setNews] = useState<any[]>([]);
   useEffect(() => {
-    // REPARATION ACTU : Utilisation d'un proxy RSS stable
     fetch(`https://api.rss2json.com/v1/api.json?rss_url=https://www.cert.ssi.gouv.fr/feed/&api_key=oy87v9rzn6pndl2v7mx8x17p57v0n0p8v8p8v8p8`)
       .then(res => res.json()).then(data => { if (data.items) setNews(data.items.slice(0, 3)); });
   }, []);
   return (
     <section className="bg-white p-6 md:p-8 rounded-[2.5rem] border-4 border-black shadow-2xl h-full">
       <h2 className="font-black uppercase italic text-xl mb-6 flex items-center gap-2 text-left"><Radio className="text-red-500" /> Alertes ANSSI</h2>
-      <div className="space-y-4">
+      <div className="space-y-4 text-left">
         {news.length > 0 ? news.map((item, i) => (
-          <a key={i} href={item.link} target="_blank" rel="noopener noreferrer" className="block p-3 bg-gray-50 border-2 border-black rounded-xl hover:bg-yellow-50 text-left transition-colors">
+          <a key={i} href={item.link} target="_blank" rel="noopener noreferrer" className="block p-3 bg-gray-50 border-2 border-black rounded-xl hover:bg-yellow-50 transition-colors">
             <h3 className="font-black text-[10px] uppercase leading-tight line-clamp-2">{item.title}</h3>
             <p className="text-[8px] text-gray-400 font-bold mt-1 uppercase">CERT-FR • {new Date(item.pubDate).toLocaleDateString()}</p>
           </a>
@@ -149,15 +133,17 @@ const NewsFeed = () => {
 
 function App() {
   useEffect(() => {
-    // INTEGRATION CHAT : Crisp pour répondre aux gens
-    window.$crisp = [];
-    window.CRISP_WEBSITE_ID = "771e847c-501b-4152-a5f1-59914713e2f5"; // ID de démo, à remplacer par le tien sur crisp.chat
-    (function() {
-      var d = document;
-      var s = d.createElement("script");
-      s.src = "https://client.crisp.chat/l.js";
-      s.async = 1;
-      d.getElementsByTagName("head")[0].appendChild(s);
+    // Intégration de TON Chat Tawk.to
+    var Tawk_API: any = (window as any).Tawk_API || {}, Tawk_LoadStart = new Date();
+    (function(){
+      var s1 = document.createElement("script"), s0 = document.getElementsByTagName("script")[0];
+      s1.async = true;
+      s1.src = 'https://embed.tawk.to/69ee706ebd68fb1c32a82772/1jn5mech0';
+      s1.charset = 'UTF-8';
+      s1.setAttribute('crossorigin', '*');
+      if (s0 && s0.parentNode) {
+        s0.parentNode.insertBefore(s1, s0);
+      }
     })();
   }, []);
 
@@ -166,6 +152,7 @@ function App() {
       <Helmet>
         <title>Mon Bouclier Numérique | IA & Sécurité</title>
         <meta name="description" content="Scanner phishing par IA locale, fact-checking avec Vera et protection citoyenne." />
+        <link rel="icon" type="image/png" href="/favicon.png" />
       </Helmet>
 
       <div className="min-h-screen bg-[#F0F0F0] font-sans text-black pb-20 p-4 md:p-10">
@@ -180,30 +167,30 @@ function App() {
         <Breadcrumbs />
 
         <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <article className="lg:col-span-2 bg-white p-6 rounded-[3rem] shadow-2xl border-4 border-black">
+          <article className="lg:col-span-2 bg-white p-6 rounded-[3rem] shadow-2xl border-4 border-black text-left">
             <div className="aspect-video rounded-[2.5rem] overflow-hidden border-4 border-black bg-gray-100">
               <iframe width="100%" height="100%" src="https://www.youtube.com/embed/LVYqk4O4wBw" title="Guide Cybersécurité" frameBorder="0" allowFullScreen></iframe>
             </div>
-            <div className="mt-8 text-left">
+            <div className="mt-8">
               <h2 className="text-4xl font-black uppercase italic tracking-tighter">Hygiène Numérique</h2>
-              <p className="text-base font-bold text-gray-600 mt-2">Apprenez à identifier les pièges du web avec nos nouveaux outils dopés à l'IA locale.</p>
+              <p className="text-base font-bold text-gray-600 mt-2">Apprenez à identifier les pièges du web avec nos outils dopés à l'IA locale.</p>
             </div>
           </article>
           <ScamAI />
           <NewsFeed />
           <PasswordTool />
           <section className="bg-white p-8 rounded-[3rem] border-4 border-black shadow-2xl text-center flex flex-col justify-center">
-              <div className="p-4 rounded-2xl bg-blue-500 text-white inline-block mb-4 mx-auto"><FileSearch size={32} /></div>
+              <div className="p-4 rounded-2xl bg-blue-500 text-white inline-block mb-4 mx-auto shadow-md"><FileSearch size={32} /></div>
               <h2 className="font-black uppercase text-xl mb-4">Analyse Fichier</h2>
-              <a href="https://www.virustotal.com/" target="_blank" rel="noopener noreferrer" className="w-full block py-4 bg-blue-600 text-white rounded-xl font-black text-xs uppercase hover:bg-black transition-all shadow-lg">VirusTotal</a>
+              <a href="https://www.virustotal.com/" target="_blank" rel="noopener noreferrer" className="w-full block py-4 bg-blue-600 text-white rounded-xl font-black text-xs uppercase hover:bg-black transition-all shadow-lg active:scale-95">VirusTotal</a>
           </section>
           <section className="lg:col-span-3 bg-red-600 p-8 md:p-12 rounded-[3rem] text-white flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl relative overflow-hidden border-4 border-black">
              <div className="absolute top-0 right-0 p-10 opacity-10"><Fingerprint size={160}/></div>
              <div className="relative z-10 text-left">
-               <h2 className="font-black uppercase italic text-3xl md:text-4xl">Fuites de données ?</h2>
-               <p className="text-sm font-black uppercase text-red-200 mt-3">Vérifiez vos emails sur Have I Been Pwned.</p>
+               <h2 className="font-black uppercase italic text-3xl md:text-4xl leading-none">Fuites de données ?</h2>
+               <p className="text-sm font-black uppercase text-red-200 mt-3 tracking-widest">Vérifiez vos emails sur Have I Been Pwned.</p>
              </div>
-             <a href="https://haveibeenpwned.com/" target="_blank" rel="noopener noreferrer" className="px-12 py-5 bg-white text-red-600 rounded-2xl font-black uppercase text-sm relative z-10 shadow-2xl hover:scale-105 transition-all">Scanner mes comptes</a>
+             <a href="https://haveibeenpwned.com/" target="_blank" rel="noopener noreferrer" className="w-full md:w-auto px-12 py-5 bg-white text-red-600 rounded-2xl font-black uppercase text-sm relative z-10 shadow-2xl hover:scale-105 transition-all text-center">Scanner mes comptes</a>
           </section>
         </main>
       </div>
