@@ -38,7 +38,7 @@ const ScamAI = () => {
         color: isSuspect ? "text-red-600" : "text-green-600",
         advice: isSuspect ? "🚨 Arnaque probable détectée par l'IA locale. Ne cliquez sur rien !" : "✅ Aucun danger immédiat détecté par l'IA.",
       });
-    } catch (e) { 
+    } catch (e) {
         console.error(e);
         setAnalysis({ score: 0, level: "ERREUR", color: "text-gray-500", advice: "L'IA n'a pas pu charger. Vérifiez votre connexion." });
     } finally { setLoading(false); }
@@ -79,7 +79,7 @@ const VeraModule = () => (
 const PasswordTool = () => {
   const [pass, setPass] = useState("");
   const [generated, setGenerated] = useState("");
-  
+
   const getStrength = (p: string) => {
     if (!p) return 0;
     let s = 0;
@@ -94,7 +94,7 @@ const PasswordTool = () => {
 
   const strength = getStrength(pass);
   const generatePass = () => {
-    const chars = "ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%^&*()";
+    const chars = "ABCDEFGHIJKLMOPQRSTUVWXYZabcdefghijkmnoqrstuvwxyz23456789!@#$%^&*()";
     const array = new Uint32Array(16);
     window.crypto.getRandomValues(array);
     let res = "";
@@ -179,7 +179,6 @@ const NewsFeed = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Utilisation d'une méthode plus simple sans clé API complexe
     fetch(`https://api.rss2json.com/v1/api.json?rss_url=https://www.cert.ssi.gouv.fr/feed/&count=3&t=${Date.now()}`)
       .then(res => res.json())
       .then(data => {
@@ -215,9 +214,48 @@ const NewsFeed = () => {
   );
 };
 
+// --- 7. CHECKLIST SÉCURITÉ ---
+const SecurityChecklist = () => {
+  const [items, setItems] = useState([
+    { id: 1, text: "Double authentification (2FA) activée", checked: false },
+    { id: 2, text: "Mots de passe uniques et complexes", checked: false },
+    { id: 3, text: "Mises à jour système effectuées", checked: false },
+    { id: 4, text: "Sauvegardes régulières des données", checked: false },
+    { id: 5, text: "Méfiance envers les emails inconnus", checked: false },
+  ]);
+
+  const toggle = (id: number) => {
+    setItems(items.map(item => item.id === id ? { ...item, checked: !item.checked } : item));
+  };
+
+  const progress = Math.round((items.filter(i => i.checked).length / items.length) * 100);
+
+  return (
+    <section className="bg-green-500 p-8 rounded-[2.5rem] text-white shadow-2xl border-4 border-black h-full flex flex-col justify-center text-left relative overflow-hidden">
+      <div className="absolute top-0 right-0 p-4 opacity-10"><CheckCircle2 size={120} /></div>
+      <h2 className="font-black italic uppercase text-2xl mb-4 relative z-10">Checklist Hygiène</h2>
+      <div className="space-y-3 relative z-10 mb-6">
+        {items.map(item => (
+          <div key={item.id} onClick={() => toggle(item.id)} className="flex items-center gap-3 cursor-pointer group">
+            <div className={`w-6 h-6 border-2 border-black rounded flex items-center justify-center transition-colors ${item.checked ? 'bg-black' : 'bg-white'}`}>
+              {item.checked && <CheckCircle2 size={14} className="text-green-500" />}
+            </div>
+            <span className={`text-sm font-bold ${item.checked ? 'line-through opacity-70' : ''}`}>{item.text}</span>
+          </div>
+        ))}
+      </div>
+      <div className="relative z-10">
+        <div className="h-4 bg-black/20 rounded-full overflow-hidden border-2 border-black">
+          <div className="h-full bg-white transition-all duration-500" style={{ width: `${progress}%` }} />
+        </div>
+        <p className="text-[10px] font-black uppercase mt-2">Niveau de protection : {progress}%</p>
+      </div>
+    </section>
+  );
+};
+
 function App() {
   useEffect(() => {
-    // Chat Tawk.to direct
     const s = document.createElement("script");
     s.async = true;
     s.src = 'https://embed.tawk.to/69ee706ebd68fb1c32a82772/1jn5mech0';
@@ -241,7 +279,7 @@ function App() {
             <h1 className="text-3xl md:text-4xl font-black uppercase italic tracking-tighter leading-none text-left">Mon Bouclier<br/><span className="text-yellow-500 text-2xl md:text-3xl">Numérique</span></h1>
           </div>
           <a href="/Bouclier%20Cyber%20.apk" download className="bg-[#ffde59] px-8 py-4 rounded-2xl font-black uppercase border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] transition-all text-sm active:translate-x-[0px] active:translate-y-[0px] active:shadow-none">
-            📥 Télécharger l'App
+            🚀 Télécharger l'App
           </a>
         </header>
 
@@ -269,11 +307,12 @@ function App() {
           </section>
 
           <CyberQuiz />
+          <SecurityChecklist />
 
           <section className="lg:col-span-3 bg-red-600 p-8 md:p-14 rounded-[3rem] text-white flex flex-col md:flex-row items-center justify-between gap-10 shadow-2xl relative overflow-hidden border-4 border-black text-left">
              <div className="absolute top-0 right-0 p-10 opacity-10"><Fingerprint size={200}/></div>
              <div className="relative z-10">
-               <h2 className="font-black uppercase italic text-4xl md:text-5xl tracking-tighter leading-none mb-4">Données compromises ?</h2>
+               <h2 className="font-black uppercase italic text-4xl md:text-5xl tracking-tight leading-none mb-4">Données compromises ?</h2>
                <p className="text-lg font-black uppercase text-red-200 tracking-tight">Vérifiez si vos comptes figurent dans des fuites publiques.</p>
              </div>
              <a href="https://haveibeenpwned.com/" target="_blank" rel="noopener noreferrer" className="px-16 py-6 bg-white text-red-600 rounded-[2rem] font-black uppercase text-lg relative z-10 shadow-[8px_8px_0px_0px_rgba(0,0,0,0.2)] hover:scale-105 transition-all text-center">
