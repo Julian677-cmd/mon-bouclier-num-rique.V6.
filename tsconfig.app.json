@@ -6,7 +6,7 @@
     "lib": [
       "ES2020",
       "DOM",
-      "DOM.Iterable"
+      "DOM.Iteratable"
     ],
     "module": "ESNext",
     "moduleDetection": "force",
@@ -18,7 +18,7 @@
     "noUnusedParameters": false,
     "paths": {
       "@/*": [
-        "./src/*"
+        "./*"
       ]
     },
     "skipLibCheck": true,
@@ -30,6 +30,10 @@
     "useDefineForClassFields": true
   },
   "include": [
-    "src"
+    "main.tsx",
+    "App.tsx",
+    "App.css",
+    "index.css",
+    "vite-env.d.ts"
   ]
 }
