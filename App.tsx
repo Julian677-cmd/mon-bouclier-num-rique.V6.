@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { 
   ShieldCheck, Loader2, Globe, Trophy, Key, Fingerprint, ShieldAlert, 
-  FileSearch, Radio, ChevronRight, MessageSquare, CheckCircle2, XCircle, Info, UserSecret, Send
+  FileSearch, Radio, ChevronRight, MessageSquare, CheckCircle2, XCircle, Info, Send
 } from 'lucide-react';
 import { pipeline } from '@xenova/transformers';
 
@@ -17,11 +17,16 @@ const Breadcrumbs = () => (
   </nav>
 );
 
-// --- 2. BANNIERE ALERTE URGENTE ---
+// --- 2. BANNIERE ALERTE URGENTE (Lien Fixé) ---
 const UrgentAlert = () => (
-  <div className="bg-red-600 text-white py-3 px-4 text-center font-black uppercase text-xs tracking-widest animate-pulse">
-    🚨 Alerte Critique : Faille de sécurité Adobe Acrobat detected. Mettez à jour vos logiciels immédiatement !
-  </div>
+  <a 
+    href="https://www.cybermalveillance.gouv.fr/tous-nos-contenus/actualites/alertecyber-faille-securite-critique-adobe-acrobat-acrobat-reader" 
+    target="_blank" 
+    rel="noopener noreferrer"
+    className="block bg-red-600 text-white py-3 px-4 text-center font-black uppercase text-[10px] md:text-xs tracking-widest animate-pulse hover:bg-red-700 transition-colors"
+  >
+    🚨 Alerte Critique : Faille Adobe Acrobat. Cliquez ici pour voir comment vous protéger !
+  </a>
 );
 
 // --- 3. SCANNER PHISHING IA ---
@@ -175,6 +180,54 @@ const NewsFeed = () => {
   );
 };
 
+// --- 8. CYBER QUIZ ---
+const CyberQuiz = () => {
+  const [step, setStep] = useState(0);
+  const [score, setScore] = useState(0);
+  const [showExplanation, setShowExplanation] = useState(false);
+  const [showFinal, setShowFinal] = useState(false);
+
+  const questions = [
+    { q: "Un ami demande de l'argent en urgence par SMS ?", r: "Faux", e: "C'est une arnaque classique. Appelez toujours pour confirmer. Pour en savoir plus sur les arnaques aux sentiments et deepfakes : https://www.cybermalveillance.gouv.fr" },
+    { q: "Le cadenas (HTTPS) garantit la fiabilité d'un site ?", r: "Faux", e: "Le cadenas chiffre la connexion, mais le site peut être frauduleux. Vérifiez toujours l'URL." },
+    { q: "L'IA peut imiter la voix d'un proche ?", r: "Vrai", e: "C'est le deepfake vocal. Soyez vigilant lors d'appels suspects demandant de l'argent." },
+    { q: "Utiliser le même mot de passe partout ?", r: "Faux", e: "Utilisez un gestionnaire de mots de passe pour avoir une clé unique par site." }
+  ];
+
+  const handleAns = (ans: string) => {
+    if (ans === questions[step].r) setScore(score + 1);
+    setShowExplanation(true);
+  };
+
+  return (
+    <section className="bg-purple-600 p-8 rounded-[2.5rem] text-white shadow-2xl border-4 border-black h-full flex flex-col justify-center text-left relative">
+      <h2 className="font-black italic uppercase text-2xl mb-4 tracking-tighter">Cyber Quiz</h2>
+      {!showFinal ? (
+        <div className="bg-white/10 p-5 rounded-2xl">
+          <p className="font-bold text-base mb-6">{questions[step].q}</p>
+          {!showExplanation ? (
+            <div className="grid grid-cols-2 gap-4">
+              <button onClick={() => handleAns("Vrai")} className="bg-white text-purple-600 py-3 rounded-xl font-black uppercase text-xs">Vrai</button>
+              <button onClick={() => handleAns("Faux")} className="bg-black text-white py-3 rounded-xl font-black uppercase text-xs">Faux</button>
+            </div>
+          ) : (
+            <div className="animate-in fade-in slide-in-from-bottom-2">
+              <p className="text-xs font-bold mb-4 bg-black/20 p-4 rounded-xl border border-white/20 italic">{questions[step].e}</p>
+              <button onClick={() => { setShowExplanation(false); if (step < questions.length - 1) setStep(step + 1); else setShowFinal(true); }} className="w-full bg-white text-purple-600 py-3 rounded-xl font-black uppercase text-[10px]">Suivant</button>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="text-center">
+          <Trophy size={56} className="mx-auto mb-4 text-yellow-400"/>
+          <p className="font-black text-3xl uppercase">Score : {score}/{questions.length}</p>
+          <button onClick={() => {setStep(0); setScore(0); setShowFinal(false)}} className="mt-6 bg-black text-white px-8 py-2 rounded-full font-black uppercase text-[10px]">Recommencer</button>
+        </div>
+      )}
+    </section>
+  );
+};
+
 function App() {
   useEffect(() => {
     const s = document.createElement("script"); s.src = "https://embed.tawk.to/69ee706ebd68fb1c32a82772/1jn5mech0"; s.async = true; document.head.appendChild(s);
@@ -199,17 +252,18 @@ function App() {
                 <iframe width="100%" height="100%" src="https://www.youtube.com/embed/LVYqk4O4wBw" frameBorder="0" allowFullScreen></iframe>
               </div>
               <h2 className="text-4xl font-black uppercase italic tracking-tighter mb-4">Hygiène Numérique</h2>
-              <p className="text-base font-bold text-gray-600">Utilisez nos outils pour tester vos messages suspects et protéger vos identités.</p>
+              <p className="text-base font-bold text-gray-600">Protégez votre identité et vos données avec nos outils pilotés par l'intelligence artificielle locale.</p>
             </article>
             <ScamAI />
             <IdentityPhantom />
             <VeraModule />
             <NewsFeed />
             <PasswordTool />
+            <CyberQuiz />
             <section className="bg-white p-10 rounded-[3rem] border-4 border-black shadow-2xl flex flex-col justify-center items-center">
                 <div className="p-5 rounded-2xl bg-blue-500 text-white mb-6"><FileSearch size={40} /></div>
                 <h2 className="font-black uppercase text-2xl mb-4">VirusTotal</h2>
-                <a href="https://www.virustotal.com/" target="_blank" rel="noopener noreferrer" className="w-full py-5 bg-black text-white rounded-2xl font-black uppercase text-sm hover:bg-blue-600 transition-all shadow-xl active:scale-95">Analyser un fichier</a>
+                <a href="https://www.virustotal.com/" target="_blank" rel="noopener noreferrer" className="w-full py-5 bg-black text-white rounded-2xl font-black uppercase text-sm hover:bg-blue-600 transition-all shadow-xl active:scale-95">Scanner un fichier</a>
             </section>
           </main>
         </div>
