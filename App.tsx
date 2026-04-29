@@ -17,7 +17,7 @@ const Breadcrumbs = () => (
   </nav>
 );
 
-// --- 2. BANNIERE ALERTE URGENTE (Lien Fixé) ---
+// --- 2. BANNIERE ALERTE URGENTE ---
 const UrgentAlert = () => (
   <a 
     href="https://www.cybermalveillance.gouv.fr/tous-nos-contenus/actualites/alertecyber-faille-securite-critique-adobe-acrobat-acrobat-reader" 
@@ -228,6 +228,46 @@ const CyberQuiz = () => {
   );
 };
 
+// --- 9. CHECKLIST SECURITE ---
+const SecurityChecklist = () => {
+  const [items, setItems] = useState([
+    { id: 1, text: "Double authentification (2FA) activée", checked: false },
+    { id: 2, text: "Mots de passe complexes et uniques", checked: false },
+    { id: 3, text: "Dernières mises à jour système faites", checked: false },
+    { id: 4, text: "Sauvegardes régulières effectuées", checked: false },
+    { id: 5, text: "Méfiance envers les emails inconnus", checked: false },
+  ]);
+
+  const toggle = (id: number) => {
+    setItems(items.map(i => i.id === id ? { ...i, checked: !i.checked } : i));
+  };
+
+  const progress = Math.round((items.filter(i => i.checked).length / items.length) * 100);
+
+  return (
+    <section className="bg-green-500 p-8 rounded-[2.5rem] text-white shadow-2xl border-4 border-black h-full flex flex-col justify-center text-left relative overflow-hidden">
+      <div className="absolute top-0 right-0 p-4 opacity-10"><CheckCircle2 size={120} /></div>
+      <h2 className="font-black italic uppercase text-2xl mb-4 relative z-10">Checklist Hygiène</h2>
+      <div className="space-y-3 relative z-10 mb-6">
+        {items.map(i => (
+          <div key={i.id} onClick={() => toggle(i.id)} className="flex items-center gap-3 cursor-pointer group">
+            <div className={`w-6 h-6 border-2 border-black rounded flex items-center justify-center transition-colors ${i.checked ? 'bg-black' : 'bg-white'}`}>
+              {i.checked && <CheckCircle2 size={14} className="text-green-500" />}
+            </div>
+            <span className={`text-sm font-bold ${i.checked ? 'line-through opacity-70' : ''}`}>{i.text}</span>
+          </div>
+        ))}
+      </div>
+      <div className="relative z-10">
+        <div className="h-4 bg-black/20 rounded-full overflow-hidden border-2 border-black">
+          <div className="h-full bg-white transition-all duration-500" style={{ width: `${progress}%` }} />
+        </div>
+        <p className="text-[10px] font-black uppercase mt-2">Protection : {progress}%</p>
+      </div>
+    </section>
+  );
+};
+
 function App() {
   useEffect(() => {
     const s = document.createElement("script"); s.src = "https://embed.tawk.to/69ee706ebd68fb1c32a82772/1jn5mech0"; s.async = true; document.head.appendChild(s);
@@ -255,11 +295,24 @@ function App() {
               <p className="text-base font-bold text-gray-600">Protégez votre identité et vos données avec nos outils pilotés par l'intelligence artificielle locale.</p>
             </article>
             <ScamAI />
+            <SecurityChecklist />
             <IdentityPhantom />
             <VeraModule />
             <NewsFeed />
             <PasswordTool />
             <CyberQuiz />
+
+            <section className="lg:col-span-3 bg-red-600 p-8 md:p-14 rounded-[3rem] text-white flex flex-col md:flex-row items-center justify-between gap-10 shadow-2xl relative overflow-hidden border-4 border-black text-left">
+              <div className="absolute top-0 right-0 p-10 opacity-10"><Fingerprint size={200}/></div>
+              <div className="relative z-10">
+                <h2 className="font-black uppercase italic text-4xl md:text-5xl tracking-tighter leading-none mb-4">Données compromises ?</h2>
+                <p className="text-lg font-black uppercase text-red-200 tracking-tight">Vérifiez si vos comptes figurent dans des fuites publiques.</p>
+              </div>
+              <a href="https://haveibeenpwned.com/" target="_blank" rel="noopener noreferrer" className="px-16 py-6 bg-white text-red-600 rounded-[2rem] font-black uppercase text-lg relative z-10 shadow-[8px_8px_0px_0px_rgba(0,0,0,0.2)] hover:scale-105 transition-all text-center">
+                Scanner mes mails
+              </a>
+            </section>
+
             <section className="bg-white p-10 rounded-[3rem] border-4 border-black shadow-2xl flex flex-col justify-center items-center">
                 <div className="p-5 rounded-2xl bg-blue-500 text-white mb-6"><FileSearch size={40} /></div>
                 <h2 className="font-black uppercase text-2xl mb-4">VirusTotal</h2>
