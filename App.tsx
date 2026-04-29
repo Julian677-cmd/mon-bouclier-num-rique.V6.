@@ -63,7 +63,12 @@ const ScamAI = () => {
       await fetch('https://cyberwolfx.app.n8n.cloud/webhook/scam-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: analysis.text, source: "Bouclier Numérique" })
+        body: JSON.stringify({ 
+          text: analysis.text, 
+          score: analysis.score, 
+          level: analysis.level, 
+          source: "Mon Bouclier Numérique (Julian)"
+        })
       });
       setReported(true);
     } catch (e) { console.error("Erreur n8n", e); }
@@ -158,20 +163,35 @@ const PasswordTool = () => {
 const VeraModule = () => (
   <section className="bg-blue-600 p-8 rounded-[2.5rem] text-white shadow-2xl border-4 border-black flex flex-col justify-center text-left relative overflow-hidden">
     <div className="absolute top-0 right-0 p-4 opacity-10"><Globe size={120} /></div>
-    <div className="bg-white text-blue-600 p-3 rounded-xl inline-block w-fit mb-4"><Info size={28}/></div>
-    <h2 className="font-black italic uppercase text-2xl mb-2">Fact-Checking VERA</h2>
-    <p className="text-sm font-bold opacity-90 mb-6">Vérifiez les faits en quelques secondes avec Vera.</p>
-    <a href="https://www.askvera.org" target="_blank" rel="noopener noreferrer" className="bg-white text-blue-600 py-4 rounded-xl font-black uppercase text-center hover:bg-blue-50 transition-all shadow-xl active:scale-95">Interroger Vera</a>
+    <div className="bg-white text-blue-600 p-3 rounded-xl inline-block w-fit mb-4 shadow-lg relative z-10"><Info size={28}/></div>
+    <h2 className="font-black italic uppercase text-2xl mb-2 relative z-10">Fact-Checking VERA</h2>
+    <p className="text-sm font-bold opacity-90 mb-6 relative z-10">Vérifiez les faits en quelques secondes avec Vera.</p>
+    <a href="https://www.askvera.org" target="_blank" rel="noopener noreferrer" className="bg-white text-blue-600 py-4 rounded-xl font-black uppercase text-center hover:bg-blue-50 transition-all shadow-xl relative z-10 active:scale-95">Interroger Vera</a>
   </section>
 );
 
-// --- 8. NEWS FEED ---
+// --- 8. NEWS FEED (Fixed for robustness) ---
 const NewsFeed = () => {
   const [news, setNews] = useState<any[]>([]);
+  const [error, setError] = useState(false);
+
   useEffect(() => {
-    fetch(`https://api.rss2json.com/v1/api.json?rss_url=https://www.cert.ssi.gouv.fr/feed/&count=3&t=${Date.now()}`)
-      .then(res => res.json()).then(data => { if (data.items) setNews(data.items); });
+    // Use an alternative stable RSS-to-JSON proxy
+    fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://www.cert.ssi.gouv.fr/feed/')}`)
+      .then(res => res.json())
+      .then(data => {
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(data.contents, "text/xml");
+        const items = Array.from(xmlDoc.querySelectorAll("item")).slice(0, 3).map(el => ({
+          title: el.querySelector("title")?.textContent,
+          link: el.querySelector("link")?.textContent,
+          pubDate: el.querySelector("pubDate")?.textContent,
+        }));
+        setNews(items);
+      })
+      .catch(() => setError(true));
   }, []);
+
   return (
     <section className="bg-white p-6 md:p-8 rounded-[2.5rem] border-4 border-black shadow-2xl h-full text-left">
       <h2 className="font-black uppercase italic text-xl mb-6 flex items-center gap-2"><Radio className="text-red-500 animate-pulse" /> Alertes ANSSI</h2>
@@ -181,7 +201,7 @@ const NewsFeed = () => {
             <h3 className="font-black text-[11px] uppercase leading-tight mb-2">{item.title}</h3>
             <p className="text-[8px] bg-red-100 text-red-600 w-fit px-2 py-0.5 rounded font-black">{new Date(item.pubDate).toLocaleDateString()}</p>
           </a>
-        )) : <div className="text-xs font-bold text-gray-400 uppercase">Chargement...</div>}
+        )) : error ? <div className="text-xs font-bold text-red-500 uppercase">Erreur de chargement des flux</div> : <div className="text-xs font-bold text-gray-400 uppercase animate-pulse">Chargement des alertes...</div>}
       </div>
     </section>
   );
