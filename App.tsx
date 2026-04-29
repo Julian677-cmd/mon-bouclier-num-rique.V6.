@@ -94,14 +94,14 @@ const ScamAI = () => {
   );
 };
 
-// --- 4. ALERTE DEEPFAKE (Nouveau Module Dédié) ---
+// --- 4. ALERTE DEEPFAKE ---
 const DeepfakeAlert = () => (
   <section className="bg-zinc-900 p-8 rounded-[2.5rem] border-4 border-black shadow-2xl text-white flex flex-col justify-center text-left relative overflow-hidden">
     <div className="absolute top-0 right-0 p-4 opacity-10"><VideoOff size={140} /></div>
     <div className="bg-red-500 text-white p-3 rounded-xl inline-block w-fit mb-4 shadow-lg relative z-10"><VideoOff size={28}/></div>
     <h2 className="font-black italic uppercase text-2xl mb-2 relative z-10">Alerte Deepfake</h2>
-    <p className="text-sm font-bold opacity-90 mb-6 relative z-10">L'IA peut imiter les voix et les visages. En cas de doute lors d'un appel vidéo ou vocal, posez une question personnelle secrète.</p>
-    <a href="https://www.cybermalveillance.gouv.fr/tous-nos-contenus/actualites/infographie-les-deepfakes" target="_blank" rel="noopener noreferrer" className="bg-red-500 text-white py-4 rounded-xl font-black uppercase text-center hover:bg-red-600 transition-all shadow-xl relative z-10 active:scale-95">Se protéger</a>
+    <p className="text-sm font-bold opacity-90 mb-6 relative z-10">L'IA peut imiter les voix et les visages (Hypertrucage). Soyez vigilant lors de vos appels.</p>
+    <a href="https://www.cnil.fr/fr/hypertrucage-deepfake" target="_blank" rel="noopener noreferrer" className="bg-red-500 text-white py-4 rounded-xl font-black uppercase text-center hover:bg-red-600 transition-all shadow-xl relative z-10 active:scale-95">Guide de la CNIL</a>
   </section>
 );
 
@@ -158,10 +158,10 @@ const PasswordTool = () => {
 const VeraModule = () => (
   <section className="bg-blue-600 p-8 rounded-[2.5rem] text-white shadow-2xl border-4 border-black flex flex-col justify-center text-left relative overflow-hidden">
     <div className="absolute top-0 right-0 p-4 opacity-10"><Globe size={120} /></div>
-    <div className="bg-white text-blue-600 p-3 rounded-xl inline-block w-fit mb-4 shadow-lg relative z-10"><Info size={28}/></div>
-    <h2 className="font-black italic uppercase text-2xl mb-2 relative z-10">Fact-Checking VERA</h2>
-    <p className="text-sm font-bold opacity-90 mb-6 relative z-10">Vérifiez les faits en quelques secondes avec Vera.</p>
-    <a href="https://www.askvera.org" target="_blank" rel="noopener noreferrer" className="bg-white text-blue-600 py-4 rounded-xl font-black uppercase text-center hover:bg-blue-50 transition-all shadow-xl relative z-10 active:scale-95">Interroger Vera</a>
+    <div className="bg-white text-blue-600 p-3 rounded-xl inline-block w-fit mb-4"><Info size={28}/></div>
+    <h2 className="font-black italic uppercase text-2xl mb-2">Fact-Checking VERA</h2>
+    <p className="text-sm font-bold opacity-90 mb-6">Vérifiez les faits en quelques secondes avec Vera.</p>
+    <a href="https://www.askvera.org" target="_blank" rel="noopener noreferrer" className="bg-white text-blue-600 py-4 rounded-xl font-black uppercase text-center hover:bg-blue-50 transition-all shadow-xl active:scale-95">Interroger Vera</a>
   </section>
 );
 
