@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { 
   ShieldCheck, Loader2, Globe, Trophy, Key, Fingerprint, ShieldAlert, 
-  FileSearch, Radio, ChevronRight, MessageSquare, CheckCircle2, XCircle, Info, Send
+  FileSearch, Radio, ChevronRight, MessageSquare, CheckCircle2, XCircle, Info, Send, VideoOff
 } from 'lucide-react';
 import { pipeline } from '@xenova/transformers';
 
@@ -76,7 +76,7 @@ const ScamAI = () => {
         <h2 className="font-black italic uppercase text-2xl tracking-tighter">Scanner IA</h2>
       </header>
       <textarea className="w-full h-40 p-4 bg-gray-50 border-2 border-black rounded-2xl font-bold text-sm focus:ring-4 ring-yellow-400 outline-none text-black mb-4" placeholder="Collez le message suspect ici..." value={text} onChange={(e) => setText(e.target.value)} />
-      <button onClick={analyzeReal} disabled={loading || text.length < 10} className="w-full bg-black text-white py-4 rounded-2xl font-black uppercase hover:bg-yellow-400 hover:text-black transition-all mb-3">
+      <button onClick={analyzeReal} disabled={loading || text.length < 10} className="w-full bg-black text-white py-4 rounded-2xl font-black uppercase hover:bg-yellow-400 hover:text-black transition-all mb-3 shadow-lg active:scale-95">
         {loading ? <Loader2 className="animate-spin mx-auto" /> : "Lancer l'Analyse"}
       </button>
       {analysis && (
@@ -94,7 +94,18 @@ const ScamAI = () => {
   );
 };
 
-// --- 4. IDENTITÉ FANTÔME (Générateur de Pseudo) ---
+// --- 4. ALERTE DEEPFAKE (Nouveau Module Dédié) ---
+const DeepfakeAlert = () => (
+  <section className="bg-zinc-900 p-8 rounded-[2.5rem] border-4 border-black shadow-2xl text-white flex flex-col justify-center text-left relative overflow-hidden">
+    <div className="absolute top-0 right-0 p-4 opacity-10"><VideoOff size={140} /></div>
+    <div className="bg-red-500 text-white p-3 rounded-xl inline-block w-fit mb-4 shadow-lg relative z-10"><VideoOff size={28}/></div>
+    <h2 className="font-black italic uppercase text-2xl mb-2 relative z-10">Alerte Deepfake</h2>
+    <p className="text-sm font-bold opacity-90 mb-6 relative z-10">L'IA peut imiter les voix et les visages. En cas de doute lors d'un appel vidéo ou vocal, posez une question personnelle secrète.</p>
+    <a href="https://www.cybermalveillance.gouv.fr/tous-nos-contenus/actualites/infographie-les-deepfakes" target="_blank" rel="noopener noreferrer" className="bg-red-500 text-white py-4 rounded-xl font-black uppercase text-center hover:bg-red-600 transition-all shadow-xl relative z-10 active:scale-95">Se protéger</a>
+  </section>
+);
+
+// --- 5. IDENTITÉ FANTÔME ---
 const IdentityPhantom = () => {
   const [pseudo, setPseudo] = useState("");
   const generate = () => {
@@ -110,16 +121,12 @@ const IdentityPhantom = () => {
       <h2 className="font-black italic uppercase text-2xl mb-2 relative z-10">Identité Fantôme</h2>
       <p className="text-xs font-bold mb-6 relative z-10">Générez un pseudo anonyme pour vos comptes.</p>
       <button onClick={generate} className="bg-black text-white py-4 rounded-xl font-black uppercase text-xs mb-4 shadow-lg hover:bg-zinc-800 transition-all">Générer</button>
-      {pseudo && (
-        <div className="p-4 bg-white border-2 border-black rounded-xl font-mono text-center font-black text-lg cursor-pointer" onClick={() => navigator.clipboard.writeText(pseudo)}>
-          {pseudo}
-        </div>
-      )}
+      {pseudo && <div className="p-4 bg-white border-2 border-black rounded-xl font-mono text-center font-black text-lg">{pseudo}</div>}
     </section>
   );
 };
 
-// --- 5. TESTEUR DE MOT DE PASSE ---
+// --- 6. TESTEUR DE MOT DE PASSE ---
 const PasswordTool = () => {
   const [pass, setPass] = useState("");
   const [generated, setGenerated] = useState("");
@@ -139,7 +146,7 @@ const PasswordTool = () => {
   return (
     <section className="bg-black p-6 md:p-8 rounded-[2.5rem] text-white shadow-2xl text-left border-4 border-zinc-800">
       <h2 className="font-black italic uppercase text-2xl mb-6 flex items-center gap-3">Le Coffre-Fort <Key className="text-blue-400"/></h2>
-      <input type="text" className="w-full p-4 bg-zinc-900 border-2 border-zinc-700 rounded-2xl font-mono text-blue-400 mb-4 outline-none focus:border-blue-500" placeholder="Testez un mot de passe..." value={pass} onChange={(e) => setPass(e.target.value)} />
+      <input type="text" className="w-full p-4 bg-zinc-900 border-2 border-zinc-700 rounded-2xl font-mono text-blue-400 mb-4 outline-none focus:border-blue-500 shadow-inner" placeholder="Testez un mot de passe..." value={pass} onChange={(e) => setPass(e.target.value)} />
       <div className="h-3 bg-zinc-800 rounded-full mb-2 overflow-hidden"><div className={`h-full transition-all duration-700 ${strength > 75 ? 'bg-green-500' : strength > 40 ? 'bg-yellow-500' : 'bg-red-500'}`} style={{ width: `${strength}%` }} /></div>
       <button onClick={generatePass} className="w-full py-4 bg-blue-600 rounded-xl font-black uppercase text-xs hover:bg-blue-400 transition-all active:scale-95 shadow-lg">Générer un mot de passe sûr</button>
       {generated && <div className="mt-4 p-3 bg-zinc-800 text-blue-300 rounded-xl font-mono text-center text-sm cursor-pointer border border-blue-500/30" onClick={() => navigator.clipboard.writeText(generated)}>{generated}</div>}
@@ -147,18 +154,18 @@ const PasswordTool = () => {
   );
 };
 
-// --- 6. VERA MODULE ---
+// --- 7. VERA MODULE ---
 const VeraModule = () => (
   <section className="bg-blue-600 p-8 rounded-[2.5rem] text-white shadow-2xl border-4 border-black flex flex-col justify-center text-left relative overflow-hidden">
     <div className="absolute top-0 right-0 p-4 opacity-10"><Globe size={120} /></div>
-    <div className="bg-white text-blue-600 p-3 rounded-xl inline-block w-fit mb-4"><Info size={28}/></div>
-    <h2 className="font-black italic uppercase text-2xl mb-2">Vérification VERA</h2>
-    <p className="text-sm font-bold opacity-90 mb-6">Vérifiez les faits en quelques secondes.</p>
-    <a href="https://www.askvera.org" target="_blank" rel="noopener noreferrer" className="bg-white text-blue-600 py-4 rounded-xl font-black uppercase text-center hover:bg-blue-50 transition-all shadow-xl active:scale-95">Interroger Vera</a>
+    <div className="bg-white text-blue-600 p-3 rounded-xl inline-block w-fit mb-4 shadow-lg relative z-10"><Info size={28}/></div>
+    <h2 className="font-black italic uppercase text-2xl mb-2 relative z-10">Fact-Checking VERA</h2>
+    <p className="text-sm font-bold opacity-90 mb-6 relative z-10">Vérifiez les faits en quelques secondes avec Vera.</p>
+    <a href="https://www.askvera.org" target="_blank" rel="noopener noreferrer" className="bg-white text-blue-600 py-4 rounded-xl font-black uppercase text-center hover:bg-blue-50 transition-all shadow-xl relative z-10 active:scale-95">Interroger Vera</a>
   </section>
 );
 
-// --- 7. NEWS FEED ---
+// --- 8. NEWS FEED ---
 const NewsFeed = () => {
   const [news, setNews] = useState<any[]>([]);
   useEffect(() => {
@@ -180,25 +187,21 @@ const NewsFeed = () => {
   );
 };
 
-// --- 8. CYBER QUIZ ---
+// --- 9. CYBER QUIZ ---
 const CyberQuiz = () => {
   const [step, setStep] = useState(0);
   const [score, setScore] = useState(0);
   const [showExplanation, setShowExplanation] = useState(false);
   const [showFinal, setShowFinal] = useState(false);
-
   const questions = [
-    { q: "Un ami demande de l'argent en urgence par SMS ?", r: "Faux", e: "C'est une arnaque classique. Appelez toujours pour confirmer. Pour en savoir plus sur les arnaques aux sentiments et deepfakes : https://www.cybermalveillance.gouv.fr" },
-    { q: "Le cadenas (HTTPS) garantit la fiabilité d'un site ?", r: "Faux", e: "Le cadenas chiffre la connexion, mais le site peut être frauduleux. Vérifiez toujours l'URL." },
-    { q: "L'IA peut imiter la voix d'un proche ?", r: "Vrai", e: "C'est le deepfake vocal. Soyez vigilant lors d'appels suspects demandant de l'argent." },
+    { q: "Un ami demande de l'argent en urgence par SMS ?", r: "Faux", e: "C'est une arnaque classique. Appelez toujours pour confirmer." },
+    { q: "Le cadenas (HTTPS) garantit la fiabilité d'un site ?", r: "Faux", e: "Faux. Le cadenas chiffre la connexion, mais le site peut être frauduleux." },
     { q: "Utiliser le même mot de passe partout ?", r: "Faux", e: "Utilisez un gestionnaire de mots de passe pour avoir une clé unique par site." }
   ];
-
   const handleAns = (ans: string) => {
     if (ans === questions[step].r) setScore(score + 1);
     setShowExplanation(true);
   };
-
   return (
     <section className="bg-purple-600 p-8 rounded-[2.5rem] text-white shadow-2xl border-4 border-black h-full flex flex-col justify-center text-left relative">
       <h2 className="font-black italic uppercase text-2xl mb-4 tracking-tighter">Cyber Quiz</h2>
@@ -207,8 +210,8 @@ const CyberQuiz = () => {
           <p className="font-bold text-base mb-6">{questions[step].q}</p>
           {!showExplanation ? (
             <div className="grid grid-cols-2 gap-4">
-              <button onClick={() => handleAns("Vrai")} className="bg-white text-purple-600 py-3 rounded-xl font-black uppercase text-xs">Vrai</button>
-              <button onClick={() => handleAns("Faux")} className="bg-black text-white py-3 rounded-xl font-black uppercase text-xs">Faux</button>
+              <button onClick={() => handleAns("Vrai")} className="bg-white text-purple-600 py-3 rounded-xl font-black uppercase text-xs hover:scale-105 transition-transform">Vrai</button>
+              <button onClick={() => handleAns("Faux")} className="bg-black text-white py-3 rounded-xl font-black uppercase text-xs hover:scale-105 transition-transform">Faux</button>
             </div>
           ) : (
             <div className="animate-in fade-in slide-in-from-bottom-2">
@@ -221,14 +224,14 @@ const CyberQuiz = () => {
         <div className="text-center">
           <Trophy size={56} className="mx-auto mb-4 text-yellow-400"/>
           <p className="font-black text-3xl uppercase">Score : {score}/{questions.length}</p>
-          <button onClick={() => {setStep(0); setScore(0); setShowFinal(false)}} className="mt-6 bg-black text-white px-8 py-2 rounded-full font-black uppercase text-[10px]">Recommencer</button>
+          <button onClick={() => {setStep(0); setScore(0); setShowFinal(false)}} className="mt-6 bg-black text-white px-8 py-2 rounded-full font-black uppercase text-[10px] shadow-xl hover:scale-105 transition-all">Rejouer</button>
         </div>
       )}
     </section>
   );
 };
 
-// --- 9. CHECKLIST SECURITE ---
+// --- 10. CHECKLIST SECURITE ---
 const SecurityChecklist = () => {
   const [items, setItems] = useState([
     { id: 1, text: "Double authentification (2FA) activée", checked: false },
@@ -237,13 +240,8 @@ const SecurityChecklist = () => {
     { id: 4, text: "Sauvegardes régulières effectuées", checked: false },
     { id: 5, text: "Méfiance envers les emails inconnus", checked: false },
   ]);
-
-  const toggle = (id: number) => {
-    setItems(items.map(i => i.id === id ? { ...i, checked: !i.checked } : i));
-  };
-
+  const toggle = (id: number) => { setItems(items.map(i => i.id === id ? { ...i, checked: !i.checked } : i)); };
   const progress = Math.round((items.filter(i => i.checked).length / items.length) * 100);
-
   return (
     <section className="bg-green-500 p-8 rounded-[2.5rem] text-white shadow-2xl border-4 border-black h-full flex flex-col justify-center text-left relative overflow-hidden">
       <div className="absolute top-0 right-0 p-4 opacity-10"><CheckCircle2 size={120} /></div>
@@ -251,17 +249,13 @@ const SecurityChecklist = () => {
       <div className="space-y-3 relative z-10 mb-6">
         {items.map(i => (
           <div key={i.id} onClick={() => toggle(i.id)} className="flex items-center gap-3 cursor-pointer group">
-            <div className={`w-6 h-6 border-2 border-black rounded flex items-center justify-center transition-colors ${i.checked ? 'bg-black' : 'bg-white'}`}>
-              {i.checked && <CheckCircle2 size={14} className="text-green-500" />}
-            </div>
+            <div className={`w-6 h-6 border-2 border-black rounded flex items-center justify-center transition-colors ${i.checked ? 'bg-black' : 'bg-white'}`}>{i.checked && <CheckCircle2 size={14} className="text-green-500" />}</div>
             <span className={`text-sm font-bold ${i.checked ? 'line-through opacity-70' : ''}`}>{i.text}</span>
           </div>
         ))}
       </div>
       <div className="relative z-10">
-        <div className="h-4 bg-black/20 rounded-full overflow-hidden border-2 border-black">
-          <div className="h-full bg-white transition-all duration-500" style={{ width: `${progress}%` }} />
-        </div>
+        <div className="h-4 bg-black/20 rounded-full overflow-hidden border-2 border-black"><div className="h-full bg-white transition-all duration-500" style={{ width: `${progress}%` }} /></div>
         <p className="text-[10px] font-black uppercase mt-2">Protection : {progress}%</p>
       </div>
     </section>
@@ -291,32 +285,29 @@ function App() {
               <div className="aspect-video rounded-[2.5rem] overflow-hidden border-4 border-black bg-gray-100 mb-8">
                 <iframe width="100%" height="100%" src="https://www.youtube.com/embed/LVYqk4O4wBw" frameBorder="0" allowFullScreen></iframe>
               </div>
-              <h2 className="text-4xl font-black uppercase italic tracking-tighter mb-4">Hygiène Numérique</h2>
-              <p className="text-base font-bold text-gray-600">Protégez votre identité et vos données avec nos outils pilotés par l'intelligence artificielle locale.</p>
+              <h2 className="text-4xl font-black uppercase italic tracking-tighter mb-4">Agir pour sa sécurité</h2>
+              <p className="text-base font-bold text-gray-600">Utilisez nos outils pilotés par l'IA pour tester vos messages suspects et protéger vos identités.</p>
             </article>
             <ScamAI />
             <SecurityChecklist />
+            <DeepfakeAlert />
             <IdentityPhantom />
             <VeraModule />
             <NewsFeed />
             <PasswordTool />
             <CyberQuiz />
-
             <section className="lg:col-span-3 bg-red-600 p-8 md:p-14 rounded-[3rem] text-white flex flex-col md:flex-row items-center justify-between gap-10 shadow-2xl relative overflow-hidden border-4 border-black text-left">
               <div className="absolute top-0 right-0 p-10 opacity-10"><Fingerprint size={200}/></div>
               <div className="relative z-10">
-                <h2 className="font-black uppercase italic text-4xl md:text-5xl tracking-tighter leading-none mb-4">Données compromises ?</h2>
-                <p className="text-lg font-black uppercase text-red-200 tracking-tight">Vérifiez si vos comptes figurent dans des fuites publiques.</p>
+                <h2 className="font-black uppercase italic text-4xl md:text-5xl">Fuite de données ?</h2>
+                <p className="text-lg font-black uppercase text-red-200 tracking-tight">Vérifiez si vos mails sont dans une base piratée.</p>
               </div>
-              <a href="https://haveibeenpwned.com/" target="_blank" rel="noopener noreferrer" className="px-16 py-6 bg-white text-red-600 rounded-[2rem] font-black uppercase text-lg relative z-10 shadow-[8px_8px_0px_0px_rgba(0,0,0,0.2)] hover:scale-105 transition-all text-center">
-                Scanner mes mails
-              </a>
+              <a href="https://haveibeenpwned.com/" target="_blank" rel="noopener noreferrer" className="px-16 py-6 bg-white text-red-600 rounded-[2rem] font-black uppercase text-lg relative z-10 shadow-[8px_8px_0px_0px_rgba(0,0,0,0.2)] hover:scale-105 transition-all text-center">Scanner mes mails</a>
             </section>
-
             <section className="bg-white p-10 rounded-[3rem] border-4 border-black shadow-2xl flex flex-col justify-center items-center">
                 <div className="p-5 rounded-2xl bg-blue-500 text-white mb-6"><FileSearch size={40} /></div>
-                <h2 className="font-black uppercase text-2xl mb-4">VirusTotal</h2>
-                <a href="https://www.virustotal.com/" target="_blank" rel="noopener noreferrer" className="w-full py-5 bg-black text-white rounded-2xl font-black uppercase text-sm hover:bg-blue-600 transition-all shadow-xl active:scale-95">Scanner un fichier</a>
+                <h2 className="font-black uppercase text-2xl mb-4 text-center">VirusTotal</h2>
+                <a href="https://www.virustotal.com/" target="_blank" rel="noopener noreferrer" className="w-full py-5 bg-black text-white rounded-2xl font-black uppercase text-sm hover:bg-blue-600 transition-all shadow-xl">Analyser un fichier</a>
             </section>
           </main>
         </div>
