@@ -30,7 +30,7 @@ const ScamAI = () => {
       const classifier = await pipeline('text-classification', 'Xenova/distilbert-base-uncased-finetuned-sst-2-english');
       const result = await classifier(text);
       const score = Math.round(result[0].score * 100);
-      const isSuspect = result[0].label === 'NEGATIVE' || /(banque|ameli|urgent|impots|virement|lot|gagné|votre compte)/i.test(text);
+      const isSuspect = result[0].label === 'NEGATIVE' || /(banque|amelie|urgent|impots|virement|lot|gagné|votre compte|amende|antai|colissimo|chronopost|netflix|livraison|bloqué)/i.test(text);
 
       setAnalysis({
         score: isSuspect ? score : 100 - score,
@@ -75,7 +75,26 @@ const VeraModule = () => (
   </section>
 );
 
-// --- 4. TESTEUR DE MOT DE PASSE (Fixé avec Entropie) ---
+// --- NEW. MODULE DEEPFAKE ---
+const DeepfakeModule = () => (
+  <section className="bg-orange-500 p-8 rounded-[2.5rem] text-white shadow-2xl border-4 border-black flex flex-col justify-center text-left relative overflow-hidden">
+    <div className="absolute top-0 right-0 p-4 opacity-10"><ShieldAlert size={120} /></div>
+    <div className="bg-white text-orange-600 p-3 rounded-xl inline-block w-fit mb-4 shadow-lg relative z-10"><ShieldAlert size={28}/></div>
+    <h2 className="font-black italic uppercase text-2xl mb-2 relative z-10">Alerte Deepfake</h2>
+    <p className="text-sm font-bold opacity-90 mb-6 relative z-10">
+      L'IA peut imiter la voix ou le visage de vos proches. Ne cédez jamais à l'urgence d'un appel suspect.
+    </p>
+    <div className="bg-black/20 p-4 rounded-xl border border-white/20 relative z-10 mb-4">
+      <p className="text-xs font-black uppercase mb-2 text-orange-200">Le réflexe « Code Secret » :</p>
+      <p className="text-sm font-bold">Convenez d'un mot secret avec votre famille pour valider les demandes d'argent ou d'aide.</p>
+    </div>
+    <a href="https://www.cybermalveillance.gouv.fr/tous-nos-contenus/actualites/infractions-intelligence-artificielle-ia" target="_blank" rel="noopener noreferrer" className="bg-white text-orange-600 py-4 rounded-xl font-black uppercase text-center hover:bg-orange-50 transition-all shadow-xl relative z-10 active:scale-95">
+      Guide de protection
+    </a>
+  </section>
+);
+
+// --- 4. TESTEUR DE MOT DE PASSE ---
 const PasswordTool = () => {
   const [pass, setPass] = useState("");
   const [generated, setGenerated] = useState("");
@@ -120,7 +139,7 @@ const PasswordTool = () => {
   );
 };
 
-// --- 5. CYBER QUIZ (Interactif) ---
+// --- 5. CYBER QUIZ ---
 const CyberQuiz = () => {
   const [step, setStep] = useState(0);
   const [score, setScore] = useState(0);
@@ -278,7 +297,7 @@ function App() {
             <div className="bg-black p-3 rounded-2xl text-yellow-400 shadow-xl"><ShieldCheck size={32} /></div>
             <h1 className="text-3xl md:text-4xl font-black uppercase italic tracking-tighter leading-none text-left">Mon Bouclier<br/><span className="text-yellow-500 text-2xl md:text-3xl">Numérique</span></h1>
           </div>
-          <a href="/Bouclier%20Cyber%20.apk" download className="bg-[#ffde59] px-8 py-4 rounded-2xl font-black uppercase border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] transition-all text-sm active:translate-x-[0px] active:translate-y-[0px] active:shadow-none">
+          <a href="/Bouclier Cyber .apk" download className="bg-[#ffde59] px-8 py-4 rounded-2xl font-black uppercase border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] transition-all text-sm active:translate-x-[0px] active:translate-y-[0px] active:shadow-none">
             🚀 Télécharger l'App
           </a>
         </header>
@@ -296,6 +315,7 @@ function App() {
 
           <ScamAI />
           <VeraModule />
+          <DeepfakeModule />
           <NewsFeed />
           <PasswordTool />
 
