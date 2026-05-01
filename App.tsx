@@ -115,24 +115,6 @@ const ScamAI = () => {
     } catch (e) { console.error('Erreur n8n', e); }
   };
 
-  const reportToN8N = async () => {
-    if (!analysis) return;
-    try {
-      await fetch('https://cyberwolfx.app.n8n.cloud/webhook/scam-report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          text: analysis.text, 
-          score: analysis.score, 
-          level: analysis.level, 
-          source: "Mon Bouclier Numérique (Julian)"
-        })
-      });
-      setReported(true);
-    } catch (e) { console.error("Erreur n8n", e); }
-  };
-
-  return (
     <article className="bg-white p-6 md:p-8 rounded-[2.5rem] border-4 border-black shadow-2xl h-full flex flex-col text-left">
       <header className="flex items-center gap-4 mb-6">
         <div className="bg-yellow-400 p-3 rounded-2xl border-2 border-black rotate-[-5deg] shadow-lg"><ShieldAlert size={28}/></div>
