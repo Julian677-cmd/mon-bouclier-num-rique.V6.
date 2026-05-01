@@ -75,7 +75,7 @@ const ScamAI = () => {
 
       const levelMap: Record<string, { level: string; color: string; advice: string }> = {
         critical: { level: 'CRITIQUE', color: 'text-red-600', advice: '🚨 Arnaque quasi certaine ! Ne cliquez sur rien. Supprimez immédiatement.' },
-        high: { level: 'ELEVE', color: 'text-orange-600', advice: '⚠️ Fortement suspect. Vérifiez l'expéditeur par un canal indépendant.' },
+        high: { level: 'ELEVE', color: 'text-orange-600', advice: '⚠️ Fortement suspect. Vérifiez l expéditeur par un canal indépendant.' },
         medium: { level: 'MODERE', color: 'text-yellow-600', advice: '🔔 Certainement vigilant requis. Ne partagez aucune information.' },
         low: { level: 'FAIBLE', color: 'text-green-600', advice: '✅ Danger limité détecté. Restez prudent néanmoins.' },
       };
