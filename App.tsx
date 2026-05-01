@@ -29,9 +29,35 @@ const UrgentAlert = () => (
   </a>
 );
 
-// --- 3. SCANNER PHISHING IA ---
+// --- 3. SCANNER PHISHING IA (AMELIORATION) ---
+const SCAM_PATTERNS = [
+  /urgent|immediat|rapidement|action immediate/i,
+  /banque|ameli|cpam|impots|fisc/i,
+  /virement|compte bloque|desactiver/i,
+  /gagne|loterie|prix|winner|reward/i,
+  /mot de passe|password|identification|login/i,
+  /Cliquez ici|Cliquez maintenant|sans tarder/i,
+  /confidentiel|urgence absolue|problem/i,
+  /bitcoin|crypto|transfert|wallet/i,
+];
+
+const getSuspiciousScore = (text: string): number => {
+  let score = 0;
+  const lowerText = text.toLowerCase();
+  
+  SCAM_PATTERNS.forEach(pattern => {
+    if (pattern.test(lowerText)) score += 15;
+  });
+  
+  if (/https?:\/\/[^\/]+\/(login|signin|account)/i.test(text)) score += 20;
+  if (/[A-Z]{5,}/.test(text)) score += 10;
+  if (/!{2,}|.{3,}/.test(text)) score += 10;
+  
+  return Math.min(score, 100);
+};
+
 const ScamAI = () => {
-  const [text, setText] = useState("");
+  const [text, setText] = useState('');
   const [analysis, setAnalysis] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [reported, setReported] = useState(false);
@@ -42,19 +68,51 @@ const ScamAI = () => {
     try {
       const classifier = await pipeline('text-classification', 'Xenova/distilbert-base-uncased-finetuned-sst-2-english');
       const result = await classifier(text);
-      const score = Math.round(result[0].score * 100);
-      const isSuspect = result[0].label === 'NEGATIVE' || /(banque|ameli|urgent|impots|virement|lot|gagné|votre compte)/i.test(text);
+      const mlScore = Math.round(result[0].score * 100);
+      const patternScore = getSuspiciousScore(text);
+      const combinedScore = Math.round(mlScore * 0.4 + patternScore * 0.6);
+      const isSuspect = combinedScore >= 50 || patternScore >= 40;
+
+      const levelMap: Record<string, { level: string; color: string; advice: string }> = {
+        critical: { level: 'CRITIQUE', color: 'text-red-600', advice: '🚨 Arnaque quasi certaine ! Ne cliquez sur rien. Supprimez immédiatement.' },
+        high: { level: 'ELEVE', color: 'text-orange-600', advice: '⚠️ Fortement suspect. Vérifiez l'expéditeur par un canal indépendant.' },
+        medium: { level: 'MODERE', color: 'text-yellow-600', advice: '🔔 Certainement vigilant requis. Ne partagez aucune information.' },
+        low: { level: 'FAIBLE', color: 'text-green-600', advice: '✅ Danger limité détecté. Restez prudent néanmoins.' },
+      };
+
+      let risk = combinedScore >= 75 ? 'critical' : combinedScore >= 60 ? 'high' : combinedScore >= 40 ? 'medium' : 'low';
+      const { level, color, advice } = levelMap[risk];
 
       setAnalysis({
         text: text,
-        score: isSuspect ? score : 100 - score,
-        level: isSuspect ? "CRITIQUE" : "FAIBLE",
-        color: isSuspect ? "text-red-600" : "text-green-600",
-        advice: isSuspect ? "🚨 Arnaque probable détectée par l'IA locale. Ne cliquez sur rien !" : "✅ Aucun danger immédiat détecté par l'IA.",
+        score: combinedScore,
+        level,
+        color,
+        advice,
+        mlScore,
+        patternScore,
       });
     } catch (e) { 
-        setAnalysis({ score: 0, level: "ERREUR", color: "text-gray-500", advice: "L'IA n'a pas pu charger." });
+      setAnalysis({ score: getSuspiciousScore(text), level: 'ERREUR', color: 'text-gray-500', advice: 'Mode dégradé actif - analyse par patterns uniquement.' });
     } finally { setLoading(false); }
+  };
+
+  const reportToN8N = async () => {
+    if (!analysis) return;
+    try {
+      await fetch(import.meta.env.VITE_N8N_WEBHOOK_URL || 'https://cyberwolfx.app.n8n.cloud/webhook/scam-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          text: analysis.text, 
+          score: analysis.score, 
+          level: analysis.level, 
+          source: 'Mon Bouclier Numérique (Julian)',
+          timestamp: new Date().toISOString()
+        })
+      });
+      setReported(true);
+    } catch (e) { console.error('Erreur n8n', e); }
   };
 
   const reportToN8N = async () => {
@@ -207,21 +265,61 @@ const NewsFeed = () => {
   );
 };
 
-// --- 9. CYBER QUIZ ---
+// --- 9. CYBER QUIZ (ENRICHI) ---
 const CyberQuiz = () => {
   const [step, setStep] = useState(0);
   const [score, setScore] = useState(0);
   const [showExplanation, setShowExplanation] = useState(false);
   const [showFinal, setShowFinal] = useState(false);
   const questions = [
-    { q: "Un ami demande de l'argent en urgence par SMS ?", r: "Faux", e: "C'est une arnaque classique. Appelez toujours pour confirmer." },
-    { q: "Le cadenas (HTTPS) garantit la fiabilité d'un site ?", r: "Faux", e: "Faux. Le cadenas chiffre la connexion, mais le site peut être frauduleux." },
-    { q: "Utiliser le même mot de passe partout ?", r: "Faux", e: "Utilisez un gestionnaire de mots de passe pour avoir une clé unique par site." }
+    { q: 'Un ami demande de l argent en urgence par SMS ?', r: 'Faux', e: 'C est une arnaque classique (smishing). Appelez toujours pour confirmer directement.' },
+    { q: 'Le cadenas (HTTPS) garantit la fiabilité d un site ?', r: 'Faux', e: 'Le cadenas chiffre la connexion, mais le site peut être frauduleux. Vérifiez l URL.' },
+    { q: 'Utiliser le même mot de passe partout ?', r: 'Faux', e: 'Un seul piratage compromet tout. Utilisez un gestionnaire comme Bitwarden.' },
+    { q: 'Un email de votre banque vous demande votre mot de passe ?', r: 'Faux', e: 'Jamais ! Les banques ne demandent jamais vos credentials par email.' },
+    { q: 'Les mises à jour système sont facultatives ?', r: 'Faux', e: 'Les mises à jour corrigent des vulnérabilités critiques. Faites-les rapidement.' },
+    { q: 'Un antivirus suffit pour être totalement protégé ?', r: 'Faux', e: 'Aucun outil n est infaillible. La vigilance et les bonnes pratiques restent essentielles.' },
   ];
   const handleAns = (ans: string) => {
     if (ans === questions[step].r) setScore(score + 1);
     setShowExplanation(true);
   };
+  const getScoreMessage = () => {
+    const pct = (score / questions.length) * 100;
+    if (pct >= 80) return 'Expert en cybersécurité !';
+    if (pct >= 60) return 'Bon niveau, continuez !';
+    if (pct >= 40) return 'Il faut réviser !';
+    return 'Danger : formez-vous d urgence !';
+  };
+  return (
+    <section className='bg-purple-600 p-8 rounded-[2.5rem] text-white shadow-2xl border-4 border-black h-full flex flex-col justify-center text-left relative'>
+      <h2 className='font-black italic uppercase text-2xl mb-4 tracking-tighter'>Cyber Quiz</h2>
+      {!showFinal ? (
+        <div className='bg-white/10 p-5 rounded-2xl'>
+          <p className='text-[10px] font-black uppercase text-yellow-300 mb-2'>Question {step + 1}/{questions.length}</p>
+          <p className='font-bold text-base mb-6'>{questions[step].q}</p>
+          {!showExplanation ? (
+            <div className='grid grid-cols-2 gap-4'>
+              <button onClick={() => handleAns('Vrai')} className='bg-white text-purple-600 py-3 rounded-xl font-black uppercase text-xs hover:scale-105 transition-transform'>Vrai</button>
+              <button onClick={() => handleAns('Faux')} className='bg-black text-white py-3 rounded-xl font-black uppercase text-xs hover:scale-105 transition-transform'>Faux</button>
+            </div>
+          ) : (
+            <div className='animate-in fade-in slide-in-from-bottom-2'>
+              <p className='text-xs font-bold mb-4 bg-black/20 p-4 rounded-xl border border-white/20 italic'>{questions[step].e}</p>
+              <button onClick={() => { setShowExplanation(false); if (step < questions.length - 1) setStep(step + 1); else setShowFinal(true); }} className='w-full bg-white text-purple-600 py-3 rounded-xl font-black uppercase text-[10px]'>Suivant</button>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className='text-center'>
+          <Trophy size={56} className='mx-auto mb-4 text-yellow-400'/>
+          <p className='font-black text-3xl uppercase'>{score}/{questions.length}</p>
+          <p className='text-sm font-bold mt-2 text-yellow-200'>{getScoreMessage()}</p>
+          <button onClick={() => {setStep(0); setScore(0); setShowFinal(false)}} className='mt-6 bg-black text-white px-8 py-2 rounded-full font-black uppercase text-[10px] shadow-xl hover:scale-105 transition-all'>Rejouer</button>
+        </div>
+      )}
+    </section>
+  );
+};
   return (
     <section className="bg-purple-600 p-8 rounded-[2.5rem] text-white shadow-2xl border-4 border-black h-full flex flex-col justify-center text-left relative">
       <h2 className="font-black italic uppercase text-2xl mb-4 tracking-tighter">Cyber Quiz</h2>
@@ -251,32 +349,38 @@ const CyberQuiz = () => {
   );
 };
 
-// --- 10. CHECKLIST SECURITE ---
+// --- 10. CHECKLIST SECURITE (ETENDUE) ---
 const SecurityChecklist = () => {
   const [items, setItems] = useState([
-    { id: 1, text: "Double authentification (2FA) activée", checked: false },
-    { id: 2, text: "Mots de passe complexes et uniques", checked: false },
-    { id: 3, text: "Dernières mises à jour système faites", checked: false },
-    { id: 4, text: "Sauvegardes régulières effectuées", checked: false },
-    { id: 5, text: "Méfiance envers les emails inconnus", checked: false },
+    { id: 1, text: 'Double authentification (2FA) activée', checked: false, category: 'authentification' },
+    { id: 2, text: 'Mots de passe uniques par site', checked: false, category: 'authentification' },
+    { id: 3, text: 'Gestionnaire de mots de passe utilisé', checked: false, category: 'authentification' },
+    { id: 4, text: 'Dernières mises à jour système faites', checked: false, category: 'maintenance' },
+    { id: 5, text: 'Sauvegardes régulières effectuées', checked: false, category: 'maintenance' },
+    { id: 6, text: 'Antivirus à jour et actif', checked: false, category: 'maintenance' },
+    { id: 7, text: 'Méfiance envers les emails inconnus', checked: false, category: 'vigilance' },
+    { id: 8, text: 'Liens vérifiés avant de cliquer', checked: false, category: 'vigilance' },
+    { id: 9, text: 'Données personnelles non partagées', checked: false, category: 'vigilance' },
+    { id: 10, text: 'VPN utilisé sur Wi-Fi public', checked: false, category: 'reseau' },
   ]);
   const toggle = (id: number) => { setItems(items.map(i => i.id === id ? { ...i, checked: !i.checked } : i)); };
   const progress = Math.round((items.filter(i => i.checked).length / items.length) * 100);
+  const getCategoryLabel = (cat: string) => ({ authentification: '🔑', maintenance: '🔧', vigilance: '👁️', reseau: '🌐' }[cat] || '');
   return (
-    <section className="bg-green-500 p-8 rounded-[2.5rem] text-white shadow-2xl border-4 border-black h-full flex flex-col justify-center text-left relative overflow-hidden">
-      <div className="absolute top-0 right-0 p-4 opacity-10"><CheckCircle2 size={120} /></div>
-      <h2 className="font-black italic uppercase text-2xl mb-4 relative z-10">Checklist Hygiène</h2>
-      <div className="space-y-3 relative z-10 mb-6">
+    <section className='bg-green-500 p-8 rounded-[2.5rem] text-white shadow-2xl border-4 border-black h-full flex flex-col justify-center text-left relative overflow-hidden'>
+      <div className='absolute top-0 right-0 p-4 opacity-10'><CheckCircle2 size={120} /></div>
+      <h2 className='font-black italic uppercase text-2xl mb-4 relative z-10'>Checklist Hygiène</h2>
+      <div className='space-y-2 relative z-10 mb-4 max-h-48 overflow-y-auto pr-2'>
         {items.map(i => (
-          <div key={i.id} onClick={() => toggle(i.id)} className="flex items-center gap-3 cursor-pointer group">
-            <div className={`w-6 h-6 border-2 border-black rounded flex items-center justify-center transition-colors ${i.checked ? 'bg-black' : 'bg-white'}`}>{i.checked && <CheckCircle2 size={14} className="text-green-500" />}</div>
-            <span className={`text-sm font-bold ${i.checked ? 'line-through opacity-70' : ''}`}>{i.text}</span>
+          <div key={i.id} onClick={() => toggle(i.id)} className='flex items-center gap-2 cursor-pointer group'>
+            <div className={`w-5 h-5 border-2 border-black rounded flex items-center justify-center transition-colors shrink-0 ${i.checked ? 'bg-black' : 'bg-white'}`}>{i.checked && <CheckCircle2 size={12} className='text-green-500' />}</div>
+            <span className={`text-[10px] font-bold ${i.checked ? 'line-through opacity-70' : ''}`}>{getCategoryLabel(i.category)} {i.text}</span>
           </div>
         ))}
       </div>
-      <div className="relative z-10">
-        <div className="h-4 bg-black/20 rounded-full overflow-hidden border-2 border-black"><div className="h-full bg-white transition-all duration-500" style={{ width: `${progress}%` }} /></div>
-        <p className="text-[10px] font-black uppercase mt-2">Protection : {progress}%</p>
+      <div className='relative z-10'>
+        <div className='h-4 bg-black/20 rounded-full overflow-hidden border-2 border-black'><div className='h-full bg-white transition-all duration-500' style={{ width: `${progress}%` }} /></div>
+        <p className='text-[10px] font-black uppercase mt-2'>Protection : {progress}% ({items.filter(i => i.checked).length}/{items.length})</p>
       </div>
     </section>
   );
