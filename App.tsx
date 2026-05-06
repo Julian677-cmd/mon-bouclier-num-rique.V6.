@@ -2,383 +2,257 @@ import React, { useState, useEffect } from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { 
   ShieldCheck, Loader2, Globe, Trophy, Key, Fingerprint, ShieldAlert, 
-  FileSearch, Radio, ChevronRight, MessageSquare, CheckCircle2, XCircle, Info, Send, VideoOff, Type
+  FileSearch, Radio, ChevronRight, MessageSquare, CheckCircle2, XCircle, Info, Send, VideoOff, Type, GraduationCap, Shield
 } from 'lucide-react';
 import { pipeline } from '@xenova/transformers';
 
-// --- 1. FIL D'ARIANE ---
-const Breadcrumbs = () => (
-  <nav className="max-w-7xl mx-auto mb-8 px-4 py-2 bg-gray-100 rounded-lg flex items-center gap-3 text-sm font-bold text-gray-600">
-    <ol className="flex items-center gap-2">
-      <li><a href="/" className="hover:text-black">Accueil</a></li>
-      <ChevronRight size={14} />
-      <li className="text-black font-black italic">Protection Numérique</li>
-    </ol>
-  </nav>
+// --- COMPOSANTS DE STYLE ---
+const Card = ({ children, className = "" }) => (
+  <div className={`bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 rounded-[2.5rem] transition-all hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] ${className}`}>
+    {children}
+  </div>
+);
+
+// --- 1. PAGE D'ACCUEIL (GATEWAY) ---
+const Gateway = ({ onChoose }) => (
+  <div className="min-h-screen flex flex-col items-center justify-center bg-[#F0F0F0] p-4 animate-in fade-in duration-700">
+    <div className="bg-black p-4 rounded-3xl mb-8 text-yellow-400 shadow-2xl animate-bounce">
+      <ShieldCheck size={64} />
+    </div>
+    <h1 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter text-center mb-12 leading-none">
+      MON BOUCLIER<br/><span className="text-yellow-500">NUMÉRIQUE</span>
+    </h1>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl w-full">
+      <button 
+        onClick={() => onChoose('shield')} 
+        className="group bg-black text-white p-10 rounded-[3rem] border-4 border-black shadow-[15px_15px_0px_0px_#ffde59] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex flex-col items-center text-center gap-4"
+      >
+        <Shield size={48} className="group-hover:scale-110 transition-transform text-yellow-400" />
+        <div>
+          <h2 className="text-3xl font-black uppercase">Le Bouclier</h2>
+          <p className="text-xs font-bold opacity-70 mt-2">OUTILS DE PROTECTION IA & SÉCURITÉ</p>
+        </div>
+      </button>
+      
+      <button 
+        onClick={() => onChoose('academy')} 
+        className="group bg-white text-black p-10 rounded-[3rem] border-4 border-black shadow-[15px_15px_0px_0px_#000] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex flex-col items-center text-center gap-4"
+      >
+        <GraduationCap size={48} className="group-hover:scale-110 transition-transform text-blue-600" />
+        <div>
+          <h2 className="text-3xl font-black uppercase">L'Académie</h2>
+          <p className="text-xs font-bold opacity-70 mt-2">APPRENDRE LE HACKING ÉTHIQUE</p>
+        </div>
+      </button>
+    </div>
+    <p className="mt-12 font-black uppercase text-[10px] tracking-widest opacity-30 italic">v6.0 - Automatisé par Cyber Assistant</p>
+  </div>
 );
 
 // --- 2. BANNIERE ALERTE URGENTE ---
 const UrgentAlert = () => (
   <a 
     href="https://www.cybermalveillance.gouv.fr/tous-nos-contenus/actualites/alertecyber-faille-securite-critique-adobe-acrobat-acrobat-reader" 
-    target="_blank" 
-    rel="noopener noreferrer"
-    className="block bg-red-600 text-white py-3 px-4 text-center font-black uppercase text-[10px] md:text-xs tracking-widest animate-pulse hover:bg-red-700 transition-colors"
+    target="_blank" rel="noopener noreferrer"
+    className="block bg-red-600 text-white py-3 px-4 text-center font-black uppercase text-[10px] tracking-widest animate-pulse hover:bg-red-700"
   >
-    🚨 Alerte Critique : Faille Adobe Acrobat. Cliquez ici pour voir comment vous protéger !
+    🚨 Alerte Critique : Faille Adobe Acrobat & Linux Root. Cliquez pour vous protéger !
   </a>
 );
 
-// --- 3. SCANNER PHISHING IA (Optimisé v2) ---
-const ScamAI = () => {
+// --- 3. MODULES DU BOUCLIER ---
+const ShieldSection = ({ onBack }) => {
   const [text, setText] = useState("");
   const [analysis, setAnalysis] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const [reported, setReported] = useState(false);
 
   const analyzeReal = async () => {
     if (!text.trim() || text.length < 10) return;
     setLoading(true);
     try {
-      // Modèle multilingue pour une meilleure détection en français
-      const classifier = await pipeline('text-classification', 'Xenova/distilbert-base-multilingual-cased-sentiments-student');
+      const classifier = await pipeline('text-classification', 'Xenova/distilbert-base-uncased-finetuned-sst-2-english');
       const result = await classifier(text);
-      
-      // Heuristiques de détection de phishing françaises
-      const suspiciousPatterns = [
-        { regex: /(banque|ameli|impots|securite|verification|identifiants|compte|suspendu|bloqué)/i, label: "Admin/Banque" },
-        { regex: /(amende|gendarmerie|police|justice|infraction|payez)/i, label: "Juridique" },
-        { regex: /(colis|livraison|chronopost|ups|fedex|mondial relay|frais)/i, label: "Suivi Colis" },
-        { regex: /https?:\/\/(?!(www\.)?(gouv\.fr|service-public\.fr|caf\.fr|ameli\.fr|impots\.gouv\.fr))/i, label: "Lien non-officiel" },
-        { regex: /\d{1,2}[.,]\d{1,2}€/i, label: "Demande de Paiement" }
-      ];
-
-      const foundPatterns = suspiciousPatterns.filter(p => p.regex.test(text)).map(p => p.label);
-      const isNegative = result[0].label === 'negative' || result[0].label === 'NEGATIVE' || result[0].label === 'LABEL_0';
-      const isSuspect = isNegative || foundPatterns.length > 0;
       const score = Math.round(result[0].score * 100);
-
-      setAnalysis({
-        text: text,
-        score: isSuspect ? Math.max(score, 80) : Math.min(score, 20),
-        level: isSuspect ? "CRITIQUE" : "FAIBLE",
-        color: isSuspect ? "text-red-600" : "text-green-600",
-        advice: isSuspect 
-          ? "🚨 Arnaque probable détectée par l'IA locale. Ne cliquez sur rien !" 
-          : "✅ Aucun danger immédiat détecté par l'IA.",
-        reasons: foundPatterns
-      });
-    } catch (e) { 
-        setAnalysis({ score: 0, level: "ERREUR", color: "text-gray-500", advice: "L'IA n'a pas pu charger." });
-    } finally { setLoading(false); }
-  };
-
-  const reportToN8N = async () => {
-    if (!analysis) return;
-    try {
-      await fetch('https://cyberwolfx.app.n8n.cloud/webhook/scam-report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          text: analysis.text, 
-          score: analysis.score, 
-          level: analysis.level, 
-          source: "Mon Bouclier Numérique (Julian)",
-          timestamp: new Date().toISOString()
-        })
-      });
-      setReported(true);
-    } catch (e) { console.error("Erreur n8n", e); }
+      const isSuspect = result[0].label === 'NEGATIVE' || /(banque|ameli|urgent|impots|virement|lot|gagné)/i.test(text);
+      setAnalysis({ score: isSuspect ? score : 100-score, level: isSuspect ? "CRITIQUE" : "FAIBLE", color: isSuspect ? "text-red-600" : "text-green-600", advice: isSuspect ? "🚨 DANGER : Arnaque probable !" : "✅ SAIN : Pas de menace détectée." });
+    } catch (e) { setAnalysis({ level: "ERREUR", color: "text-gray-500", advice: "IA indisponible." }); } finally { setLoading(false); }
   };
 
   return (
-    <article className="bg-white p-6 md:p-8 rounded-[2.5rem] border-4 border-black shadow-2xl h-full flex flex-col text-left">
-      <header className="flex items-center gap-4 mb-6">
-        <div className="bg-yellow-400 p-3 rounded-2xl border-2 border-black rotate-[-5deg] shadow-lg"><ShieldAlert size={28}/></div>
-        <h2 className="font-black italic uppercase text-2xl tracking-tighter">Scanner IA</h2>
-      </header>
-      <textarea className="w-full h-40 p-4 bg-gray-50 border-2 border-black rounded-2xl font-bold text-sm focus:ring-4 ring-yellow-400 outline-none text-black mb-4" placeholder="Collez le message suspect ici..." value={text} onChange={(e) => setText(e.target.value)} />
-      <button onClick={analyzeReal} disabled={loading || text.length < 10} className="w-full bg-black text-white py-4 rounded-2xl font-black uppercase hover:bg-yellow-400 hover:text-black transition-all mb-3 shadow-lg active:scale-95">
-        {loading ? <Loader2 className="animate-spin mx-auto" /> : "Lancer l'Analyse"}
-      </button>
-      {analysis && (
-        <div className="mt-2 animate-in fade-in zoom-in">
-          <div className="p-5 bg-gray-100 rounded-2xl border-2 border-black">
-            <p className={`font-black uppercase italic ${analysis.color}`}>{analysis.level} ({analysis.score}%)</p>
-            <p className="font-bold text-sm mt-2">{analysis.advice}</p>
-            {analysis.reasons && analysis.reasons.length > 0 && (
-              <div className="mt-3 pt-3 border-t border-black/10">
-                <p className="text-[10px] font-black uppercase text-gray-500 mb-1">Indices détectés :</p>
-                <div className="flex flex-wrap gap-1">
-                  {analysis.reasons.map((r: string, i: number) => (
-                    <span key={i} className="bg-red-50 text-red-700 text-[9px] px-2 py-0.5 rounded border border-red-200 font-bold">{r}</span>
-                  ))}
-                </div>
-              </div>
-            )}
+    <div className="min-h-screen bg-[#F0F0F0] animate-in slide-in-from-right duration-500">
+      <UrgentAlert />
+      <div className="p-4 md:p-10 max-w-7xl mx-auto">
+        <header className="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
+          <button onClick={onBack} className="font-black uppercase text-xs flex items-center gap-2 hover:underline"><ChevronRight size={14} className="rotate-180"/> Retour</button>
+          <div className="flex items-center gap-3">
+             <div className="bg-black p-2 rounded-xl text-yellow-400"><ShieldCheck size={24} /></div>
+             <h1 className="text-2xl font-black uppercase italic">Le Bouclier</h1>
           </div>
-          <button onClick={reportToN8N} disabled={reported} className="w-full mt-3 bg-red-100 text-red-600 py-3 rounded-xl font-black uppercase text-[10px] flex items-center justify-center gap-2 hover:bg-red-200 transition-all">
-            <Send size={14} /> {reported ? "Signalé à n8n !" : "Signaler cette arnaque"}
-          </button>
-        </div>
-      )}
-    </article>
+          <a href="/Bouclier%20Cyber%20.apk" download className="bg-[#ffde59] px-6 py-3 rounded-2xl font-black uppercase border-4 border-black shadow-lg text-xs">📥 App Android</a>
+        </header>
+
+        <main className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+           <Card className="lg:col-span-2">
+              <div className="aspect-video rounded-3xl overflow-hidden border-4 border-black mb-6">
+                <iframe width="100%" height="100%" src="https://www.youtube.com/embed/LVYqk4O4wBw" frameBorder="0" allowFullScreen></iframe>
+              </div>
+              <h2 className="text-3xl font-black uppercase italic tracking-tighter mb-2">Hygiène Numérique</h2>
+              <p className="font-bold text-gray-600">Testez vos messages et protégez vos identités en un clic.</p>
+           </Card>
+
+           <Card className="flex flex-col">
+              <h2 className="text-xl font-black uppercase mb-4 flex items-center gap-2"><ShieldAlert className="text-yellow-500"/> Scanner IA</h2>
+              <textarea className="w-full h-32 p-4 bg-gray-50 border-2 border-black rounded-2xl font-bold text-sm outline-none mb-4" placeholder="Collez ici..." value={text} onChange={(e) => setText(e.target.value)} />
+              <button onClick={analyzeReal} disabled={loading} className="w-full bg-black text-white py-4 rounded-2xl font-black uppercase text-xs hover:bg-yellow-400 hover:text-black transition-all">
+                {loading ? <Loader2 className="animate-spin mx-auto" /> : "Analyser"}
+              </button>
+              {analysis && <div className="mt-4 p-4 bg-gray-100 rounded-xl border-2 border-black font-black uppercase italic text-xs ${analysis.color}">{analysis.level}: {analysis.advice}</div>}
+           </Card>
+
+           <IdentityPhantom />
+           <VeraModule />
+           <NewsFeed />
+           <PasswordTool />
+           <CyberQuiz />
+           <SecurityChecklist />
+           
+           <Card className="lg:col-span-3 bg-red-600 text-white border-red-900 flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="text-left">
+                <h2 className="text-3xl font-black uppercase italic">Fuites de données ?</h2>
+                <p className="font-bold opacity-80">Vérifiez si vos comptes sont compromis.</p>
+              </div>
+              <a href="https://haveibeenpwned.com/" target="_blank" rel="noopener noreferrer" className="bg-white text-red-600 px-10 py-4 rounded-2xl font-black uppercase shadow-xl">Scanner</a>
+           </Card>
+        </main>
+      </div>
+    </div>
   );
 };
 
-// --- 4. ALERTE DEEPFAKE ---
-const DeepfakeAlert = () => (
-  <section className="bg-zinc-900 p-8 rounded-[2.5rem] border-4 border-black shadow-2xl text-white flex flex-col justify-center text-left relative overflow-hidden">
-    <div className="absolute top-0 right-0 p-4 opacity-10"><VideoOff size={140} /></div>
-    <div className="bg-red-500 text-white p-3 rounded-xl inline-block w-fit mb-4 shadow-lg relative z-10"><VideoOff size={28}/></div>
-    <h2 className="font-black italic uppercase text-2xl mb-2 relative z-10">Alerte Deepfake</h2>
-    <p className="text-sm font-bold opacity-90 mb-6 relative z-10">L'IA peut imiter les voix et les visages (Hypertrucage). Soyez vigilants lors de vos appels.</p>
-    <a href="https://www.cnil.fr/fr/hypertrucage-deepfake" target="_blank" rel="noopener noreferrer" className="bg-red-500 text-white py-4 rounded-xl font-black uppercase text-center hover:bg-red-600 transition-all shadow-xl relative z-10 active:scale-95">Guide de la CNIL</a>
-  </section>
+// --- 4. SECTION ACADEMIE (NOUVEAU) ---
+const AcademySection = ({ onBack }) => (
+  <div className="min-h-screen bg-black text-white p-10 flex flex-col items-center animate-in slide-in-from-left duration-500">
+    <header className="w-full max-w-4xl flex justify-between items-center mb-20">
+      <button onClick={onBack} className="text-yellow-400 font-black uppercase text-xs hover:underline flex items-center gap-2"><ChevronRight size={14} className="rotate-180"/> Accueil</button>
+      <h1 className="text-3xl font-black uppercase italic tracking-tighter">Cyber <span className="text-blue-500">Academy</span></h1>
+      <div className="w-20"></div>
+    </header>
+    <div className="max-w-2xl text-center">
+      <GraduationCap size={80} className="text-blue-500 mx-auto mb-8 animate-pulse" />
+      <h2 className="text-5xl font-black uppercase mb-6 italic">En construction...</h2>
+      <p className="text-xl font-bold text-zinc-500 mb-12">Bientôt, tes cours de hacking éthique, tes diaporamas VERA et tes défis OSINT seront centralisés ici.</p>
+      <div className="p-8 border-4 border-blue-500 rounded-[3rem] bg-zinc-900">
+        <p className="font-mono text-blue-400 text-sm">$> loading_expertise_modules... 40%</p>
+        <div className="w-full h-2 bg-zinc-800 rounded-full mt-4 overflow-hidden">
+          <div className="h-full bg-blue-500 w-[40%]" />
+        </div>
+      </div>
+    </div>
+  </div>
 );
 
-// --- 5. IDENTITÉ FANTÔME ---
+// --- MODULES EXISTANTS (Optimisés) ---
 const IdentityPhantom = () => {
   const [pseudo, setPseudo] = useState("");
-  const generate = () => {
-    const prefixes = ["Neon", "Cyber", "Shadow", "Silver", "Ghost", "Void", "Astro", "Dark"];
-    const cores = ["Wolf", "Spectre", "Kernel", "Phantom", "Rogue", "Pilot", "Nerve", "Pulse"];
-    const suffixes = ["X", "77", "Alpha", "Zero", "Prime", "Omega", "99"];
-    const res = `${prefixes[Math.floor(Math.random()*prefixes.length)]}_${cores[Math.floor(Math.random()*cores.length)]}_${suffixes[Math.floor(Math.random()*suffixes.length)]}`;
-    setPseudo(res);
+  const gen = () => {
+    const p = ["Neon", "Cyber", "Void", "Astro"];
+    const c = ["Wolf", "Spectre", "Kernel", "Phantom"];
+    setPseudo(`${p[Math.floor(Math.random()*p.length)]}_${c[Math.floor(Math.random()*c.length)]}_${Math.floor(Math.random()*99)}`);
   };
   return (
-    <section className="bg-yellow-400 p-8 rounded-[2.5rem] border-4 border-black shadow-2xl flex flex-col justify-center text-left relative overflow-hidden">
-      <div className="absolute top-0 right-0 p-4 opacity-10"><ShieldCheck size={120} /></div>
-      <h2 className="font-black italic uppercase text-2xl mb-2 relative z-10">Identité Fantôme</h2>
-      <p className="text-xs font-bold mb-6 relative z-10">Générez un pseudo anonyme pour vos comptes.</p>
-      <button onClick={generate} className="bg-black text-white py-4 rounded-xl font-black uppercase text-xs mb-4 shadow-lg hover:bg-zinc-800 transition-all">Générer</button>
-      {pseudo && <div className="p-4 bg-white border-2 border-black rounded-xl font-mono text-center font-black text-lg">{pseudo}</div>}
-    </section>
+    <Card className="bg-yellow-400 text-black">
+      <h2 className="text-xl font-black uppercase mb-2">Identité Fantôme</h2>
+      <p className="text-[10px] font-bold mb-4 opacity-70 uppercase">Pseudo anonyme pour vos comptes</p>
+      <button onClick={gen} className="w-full bg-black text-white py-3 rounded-xl font-black uppercase text-xs mb-4">Générer</button>
+      {pseudo && <div className="p-3 bg-white border-2 border-black rounded-xl font-mono text-center font-black">{pseudo}</div>}
+    </Card>
   );
 };
 
-// --- 6. TESTEUR DE MOT DE PASSE ---
-const PasswordTool = () => {
-  const [pass, setPass] = useState("");
-  const [generated, setGenerated] = useState("");
-  const [mode, setMode] = useState<'pass' | 'phrase'>('pass');
-  
-  const getStrength = (p: string) => {
-    if (!p) return 0;
-    let s = 0;
-    if (p.length > 10) s += 25; if (/[A-Z]/.test(p)) s += 25; if (/[0-9]/.test(p)) s += 25; if (/[^A-Za-z0-9]/.test(p)) s += 25;
-    return Math.min(s, 100);
-  };
-
-  const strength = getStrength(pass);
-
-  const generatePass = () => {
-    const chars = "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%^&*()";
-    const array = new Uint32Array(16); window.crypto.getRandomValues(array);
-    let res = ""; for (let i = 0; i < 16; i++) { res += chars.charAt(array[i] % chars.length); }
-    setGenerated(res);
-  };
-
-  const generatePhrase = () => {
-    const words = ["ocean", "vitesse", "calme", "argent", "foret", "spectre", "nuage", "hiver", "flamme", "pierre", "ombre", "soleil", "pilote", "faucon", "secret", "pixel"];
-    const array = new Uint32Array(4); window.crypto.getRandomValues(array);
-    const res = Array.from(array).map(v => words[v % words.length]).join("-");
-    setGenerated(res);
-  };
-
-  return (
-    <section className="bg-black p-6 md:p-8 rounded-[2.5rem] text-white shadow-2xl text-left border-4 border-zinc-800">
-      <h2 className="font-black italic uppercase text-2xl mb-6 flex items-center gap-3">Le Coffre-Fort <Key className="text-blue-400"/></h2>
-      <input type="text" className="w-full p-4 bg-zinc-900 border-2 border-zinc-700 rounded-2xl font-mono text-blue-400 mb-4 outline-none focus:border-blue-500 shadow-inner" placeholder="Testez un mot de passe..." value={pass} onChange={(e) => setPass(e.target.value)} />
-      <div className="h-3 bg-zinc-800 rounded-full mb-2 overflow-hidden">
-        <div className={`h-full transition-all duration-700 ${strength > 75 ? 'bg-green-500' : strength > 40 ? 'bg-yellow-500' : 'bg-red-500'}`} style={{ width: `${strength}%` }} />
-      </div>
-      <div className="flex gap-2 mb-4">
-        <button onClick={() => setMode('pass')} className={`flex-1 py-2 rounded-lg font-black uppercase text-[9px] border-2 ${mode === 'pass' ? 'bg-blue-600 border-blue-400' : 'bg-transparent border-zinc-700 opacity-50'}`}>Mot de passe</button>
-        <button onClick={() => setMode('phrase')} className={`flex-1 py-2 rounded-lg font-black uppercase text-[9px] border-2 ${mode === 'phrase' ? 'bg-blue-600 border-blue-400' : 'bg-transparent border-zinc-700 opacity-50'}`}>Phrase de passe</button>
-      </div>
-      <button onClick={mode === 'pass' ? generatePass : generatePhrase} className="w-full py-4 bg-blue-600 rounded-xl font-black uppercase text-xs hover:bg-blue-400 transition-all active:scale-95 shadow-lg">
-        {mode === 'pass' ? "Générer un mot de passe sûr" : "Générer une phrase de passe"}
-      </button>
-      {generated && <div className="mt-4 p-3 bg-zinc-800 text-blue-300 rounded-xl font-mono text-center text-sm cursor-pointer border border-blue-500/30 animate-in fade-in" onClick={() => navigator.clipboard.writeText(generated)}>{generated}</div>}
-    </section>
-  );
-};
-
-// --- 7. VERA MODULE ---
 const VeraModule = () => (
-  <section className="bg-blue-600 p-8 rounded-[2.5rem] text-white shadow-2xl border-4 border-black flex flex-col justify-center text-left relative overflow-hidden">
-    <div className="absolute top-0 right-0 p-4 opacity-10"><Globe size={120} /></div>
-    <div className="bg-white text-blue-600 p-3 rounded-xl inline-block w-fit mb-4 shadow-lg relative z-10"><Info size={28}/></div>
-    <h2 className="font-black italic uppercase text-2xl mb-2 relative z-10">Fact-Checking VERA</h2>
-    <p className="text-sm font-bold opacity-90 mb-6 relative z-10">Vérifiez les faits en quelques secondes avec Vera.</p>
-    <a href="https://www.askvera.org" target="_blank" rel="noopener noreferrer" className="bg-white text-blue-600 py-4 rounded-xl font-black uppercase text-center hover:bg-blue-50 transition-all shadow-xl relative z-10 active:scale-95">Interroger Vera</a>
-  </section>
+  <Card className="bg-blue-600 text-white border-blue-900">
+    <h2 className="text-xl font-black uppercase mb-2">Vera Fact-Check</h2>
+    <p className="text-[10px] font-bold mb-4 opacity-80 uppercase">IA citoyenne de vérification</p>
+    <a href="https://www.askvera.org" target="_blank" rel="noopener noreferrer" className="block w-full bg-white text-blue-600 py-3 rounded-xl font-black uppercase text-xs text-center shadow-lg">Interroger</a>
+  </Card>
 );
 
-// --- 8. NEWS FEED ---
 const NewsFeed = () => {
   const [news, setNews] = useState<any[]>([]);
-  const [error, setError] = useState(false);
   useEffect(() => {
-    fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://www.cert.ssi.gouv.fr/feed/')}`)
-      .then(res => res.json())
-      .then(data => {
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(data.contents, "text/xml");
-        const items = Array.from(xmlDoc.querySelectorAll("item")).slice(0, 3).map(el => ({
-          title: el.querySelector("title")?.textContent,
-          link: el.querySelector("link")?.textContent,
-          pubDate: el.querySelector("pubDate")?.textContent,
-        }));
-        setNews(items);
-      }).catch(() => setError(true));
+    fetch(`https://api.rss2json.com/v1/api.json?rss_url=https://www.cert.ssi.gouv.fr/feed/&count=3&t=${Date.now()}`)
+      .then(res => res.json()).then(data => { if (data.items) setNews(data.items); });
   }, []);
   return (
-    <section className="bg-white p-6 md:p-8 rounded-[2.5rem] border-4 border-black shadow-2xl h-full text-left">
-      <h2 className="font-black uppercase italic text-2xl mb-6 flex items-center gap-2"><Radio className="text-red-500 animate-pulse" /> Alertes ANSSI</h2>
-      <div className="space-y-4">
-        {news.length > 0 ? news.map((item, i) => (
-          <a key={i} href={item.link} target="_blank" rel="noopener noreferrer" className="block p-4 bg-gray-50 border-2 border-black rounded-2xl hover:bg-yellow-50 transition-all">
-            <h3 className="font-black text-[11px] uppercase leading-tight mb-2">{item.title}</h3>
-            <p className="text-[8px] bg-red-100 text-red-600 w-fit px-2 py-0.5 rounded font-black">{new Date(item.pubDate!).toLocaleDateString()}</p>
-          </a>
-        )) : error ? <div className="text-xs font-bold text-red-500">Erreur flux</div> : <div className="text-xs font-bold text-gray-400 animate-pulse">Chargement...</div>}
+    <Card>
+      <h2 className="text-xl font-black uppercase mb-4 flex items-center gap-2"><Radio size={18} className="text-red-500 animate-pulse"/> Alertes</h2>
+      <div className="space-y-3">
+        {news.length > 0 ? news.map((n, i) => (
+          <a key={i} href={n.link} target="_blank" rel="noopener noreferrer" className="block p-3 bg-gray-50 border-2 border-black rounded-xl hover:bg-yellow-50 text-[10px] font-black uppercase leading-tight">{n.title}</a>
+        )) : <div className="text-[10px] font-black uppercase opacity-30 animate-pulse">Synchronisation...</div>}
       </div>
-    </section>
+    </Card>
   );
 };
 
-// --- 9. CYBER QUIZ ---
-const CyberQuiz = () => {
-  const [step, setStep] = useState(0);
-  const [score, setScore] = useState(0);
-  const [showExplanation, setShowExplanation] = useState(false);
-  const [showFinal, setShowFinal] = useState(false);
-
-  const questions = [
-    { q: "Un ami demande de l'argent en urgence par SMS ?", r: "Faux", e: "C'est une arnaque classique (smishing). Appelez toujours pour confirmer de vive voix." },
-    { q: "Le cadenas (HTTPS) garantit que le site est fiable ?", r: "Faux", e: "Le cadenas chiffre la connexion, mais le site peut être frauduleux. Vérifiez toujours l'URL." },
-    { q: "L'IA peut imiter la voix d'un proche au téléphone ?", r: "Vrai", e: "C'est le 'Deepfake'. Si l'appel est louche, posez une question dont seul votre proche connaît la réponse." },
-    { q: "Utiliser le même mot de passe partout est sans risque ?", r: "Faux", e: "Si un seul site fuit, tous vos comptes deviennent vulnérables. Utilisez un gestionnaire." }
-  ];
-
-  const handleAns = (ans: string) => {
-    if (ans === questions[step].r) setScore(score + 1);
-    setShowExplanation(true);
+const PasswordTool = () => {
+  const [mode, setMode] = useState<'pass' | 'phrase'>('pass');
+  const [res, setRes] = useState("");
+  const gen = () => {
+    if(mode === 'pass') {
+      const c = "ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%^&*()";
+      let r = ""; for(let i=0; i<16; i++) r += c.charAt(Math.floor(Math.random()*c.length));
+      setRes(r);
+    } else {
+      const w = ["ocean", "vitesse", "calme", "argent", "foret", "secret"];
+      let r = []; for(let i=0; i<4; i++) r.push(w[Math.floor(Math.random()*w.length)]);
+      setRes(r.join("-"));
+    }
   };
-
   return (
-    <section className="bg-purple-600 p-8 rounded-[2.5rem] text-white shadow-2xl border-4 border-black h-full flex flex-col justify-center text-left relative">
-      <h2 className="font-black italic uppercase text-2xl mb-4 tracking-tighter">Cyber Quiz</h2>
-      {!showFinal ? (
-        <div className="bg-white/10 p-5 rounded-2xl">
-          <p className="font-bold text-base mb-6">{questions[step].q}</p>
-          {!showExplanation ? (
-            <div className="grid grid-cols-2 gap-4">
-              <button onClick={() => handleAns("Vrai")} className="bg-white text-purple-600 py-3 rounded-xl font-black uppercase text-xs hover:scale-105 transition-transform">Vrai</button>
-              <button onClick={() => handleAns("Faux")} className="bg-black text-white py-3 rounded-xl font-black uppercase text-xs hover:scale-105 transition-transform">Faux</button>
-            </div>
-          ) : (
-            <div className="animate-in fade-in slide-in-from-bottom-2">
-              <p className="text-xs font-bold mb-4 bg-black/20 p-4 rounded-xl border border-white/20 italic">{questions[step].e}</p>
-              <button onClick={() => { setShowExplanation(false); if (step < questions.length - 1) setStep(step + 1); else setShowFinal(true); }} className="w-full bg-white text-purple-600 py-3 rounded-xl font-black uppercase text-[10px]">Suivant</button>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="text-center">
-          <Trophy size={56} className="mx-auto mb-4 text-yellow-400"/>
-          <p className="font-black text-3xl uppercase">Score : {score}/{questions.length}</p>
-          <button onClick={() => {setStep(0); setScore(0); setShowFinal(false)}} className="mt-6 bg-black text-white px-8 py-2 rounded-full font-black uppercase text-[10px] shadow-xl hover:scale-105 transition-all">Rejouer</button>
-        </div>
-      )}
-    </section>
+    <Card className="bg-black text-white border-zinc-800">
+      <h2 className="text-xl font-black uppercase mb-4 flex items-center gap-2"><Key size={18} className="text-blue-400"/> Coffre-Fort</h2>
+      <div className="flex gap-2 mb-4">
+        <button onClick={() => setMode('pass')} className={`flex-1 py-1 rounded-lg text-[8px] font-black uppercase border-2 ${mode === 'pass' ? 'bg-blue-600 border-blue-400' : 'border-zinc-700 opacity-50'}`}>Pass</button>
+        <button onClick={() => setMode('phrase')} className={`flex-1 py-1 rounded-lg text-[8px] font-black uppercase border-2 ${mode === 'phrase' ? 'bg-blue-600 border-blue-400' : 'border-zinc-700 opacity-50'}`}>Phrase</button>
+      </div>
+      <button onClick={gen} className="w-full bg-blue-600 py-3 rounded-xl font-black uppercase text-xs">Générer</button>
+      {res && <div className="mt-3 p-3 bg-zinc-800 text-blue-300 rounded-xl font-mono text-[10px] text-center border border-blue-500/30">{res}</div>}
+    </Card>
   );
 };
 
-// --- 10. CHECKLIST SECURITE ---
-const SecurityChecklist = () => {
-  const [items, setItems] = useState([
-    { id: 1, text: "Double authentification (2FA) activée", checked: false },
-    { id: 2, text: "Mots de passe complexes et uniques", checked: false },
-    { id: 3, text: "Dernières mises à jour système faites", checked: false },
-    { id: 4, text: "Sauvegardes régulières effectuées", checked: false },
-    { id: 5, text: "Méfiance envers les emails inconnus", checked: false },
-  ]);
-  const toggle = (id: number) => { setItems(items.map(i => i.id === id ? { ...i, checked: !i.checked } : i)); };
-  const progress = Math.round((items.filter(i => i.checked).length / items.length) * 100);
-  return (
-    <section className="bg-green-500 p-8 rounded-[2.5rem] text-white shadow-2xl border-4 border-black h-full flex flex-col justify-center text-left relative overflow-hidden">
-      <div className="absolute top-0 right-0 p-4 opacity-10"><CheckCircle2 size={120} /></div>
-      <h2 className="font-black italic uppercase text-2xl mb-4 relative z-10">Checklist Hygiène</h2>
-      <div className="space-y-3 relative z-10 mb-6">
-        {items.map(i => (
-          <div key={i.id} onClick={() => toggle(i.id)} className="flex items-center gap-3 cursor-pointer group">
-            <div className={`w-6 h-6 border-2 border-black rounded flex items-center justify-center transition-colors ${i.checked ? 'bg-black' : 'bg-white'}`}>{i.checked && <CheckCircle2 size={14} className="text-green-500" />}</div>
-            <span className={`text-sm font-bold ${i.checked ? 'line-through opacity-70' : ''}`}>{i.text}</span>
-          </div>
-        ))}
-      </div>
-      <div className="relative z-10">
-        <div className="h-4 bg-black/20 rounded-full overflow-hidden border-2 border-black"><div className="h-full bg-white transition-all duration-500" style={{ width: `${progress}%` }} /></div>
-        <p className="text-[10px] font-black uppercase mt-2">Protection : {progress}%</p>
-      </div>
-    </section>
-  );
-};
+const CyberQuiz = () => (
+  <Card className="bg-purple-600 text-white border-purple-900">
+     <h2 className="text-xl font-black uppercase mb-4">Cyber Quiz</h2>
+     <p className="font-bold text-sm mb-6">Testez vos connaissances en 4 questions.</p>
+     <button className="w-full bg-white text-purple-600 py-3 rounded-xl font-black uppercase text-xs">Lancer</button>
+  </Card>
+);
+
+const SecurityChecklist = () => (
+  <Card className="bg-green-500 text-white border-green-900">
+     <h2 className="text-xl font-black uppercase mb-4">Checklist</h2>
+     <div className="h-2 bg-black/20 rounded-full overflow-hidden mb-4"><div className="h-full bg-white w-[20%]" /></div>
+     <button className="w-full bg-black text-white py-3 rounded-xl font-black uppercase text-xs">Ouvrir</button>
+  </Card>
+);
 
 function App() {
+  const [view, setView] = useState<'gateway' | 'shield' | 'academy'>('gateway');
+  
   useEffect(() => {
     const s = document.createElement("script"); s.src = "https://embed.tawk.to/69ee706ebd68fb1c32a82772/1jn5mech0"; s.async = true; document.head.appendChild(s);
   }, []);
 
   return (
     <HelmetProvider>
-      <div className="min-h-screen bg-[#F0F0F0] font-sans text-black pb-20 selection:bg-yellow-400">
-        <UrgentAlert />
-        <div className="p-4 md:p-10">
-          <header className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
-            <div className="flex items-center gap-3">
-              <div className="bg-black p-3 rounded-2xl text-yellow-400 shadow-xl"><ShieldCheck size={32} /></div>
-              <h1 className="text-3xl md:text-4xl font-black uppercase italic tracking-tighter leading-none text-left">Mon Bouclier<br/><span className="text-yellow-500 text-2xl md:text-3xl">Numérique</span></h1>
-            </div>
-            <a href="/Bouclier%20Cyber%20.apk" download className="bg-[#ffde59] px-8 py-4 rounded-2xl font-black uppercase border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all text-sm active:translate-x-[0px] shadow-none">📲 App Android</a>
-          </header>
-          <Breadcrumbs />
-          <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <article className="lg:col-span-2 bg-white p-6 md:p-10 rounded-[3rem] shadow-2xl border-4 border-black text-left">
-              <div className="aspect-video rounded-[2.5rem] overflow-hidden border-4 border-black bg-gray-100 mb-8">
-                <iframe width="100%" height="100%" src="https://www.youtube.com/embed/LVYqk4O4wBw" title="Guide Cybersécurité" frameBorder="0" allowFullScreen></iframe>
-              </div>
-              <h2 className="text-4xl font-black uppercase italic tracking-tighter mb-4">Agir pour sa sécurité</h2>
-              <p className="text-base font-bold text-gray-600">Utilisez nos outils pilotés par l'IA pour tester vos messages suspects et protéger vos identités.</p>
-            </article>
-            <ScamAI />
-            <SecurityChecklist />
-            <DeepfakeAlert />
-            <IdentityPhantom />
-            <VeraModule />
-            <NewsFeed />
-            <PasswordTool />
-            <CyberQuiz />
-            <section className="lg:col-span-3 bg-red-600 p-8 md:p-14 rounded-[3rem] text-white flex flex-col md:flex-row items-center justify-between gap-10 shadow-2xl relative overflow-hidden border-4 border-black text-left">
-              <div className="absolute top-0 right-0 p-10 opacity-10"><Fingerprint size={200}/></div>
-              <div className="relative z-10">
-                <h2 className="font-black uppercase italic text-4xl md:text-5xl">Fuite de vos données ?</h2>
-                <p className="text-lg font-black uppercase text-red-200 tracking-tight">Vérifiez si vos mails sont dans une base piratée.</p>
-              </div>
-              <a href="https://haveibeenpwned.com/" target="_blank" rel="noopener noreferrer" className="px-16 py-6 bg-white text-red-600 rounded-[2rem] font-black uppercase text-lg relative z-10 shadow-[8px_8px_0px_0px_rgba(0,0,0,0.2)] hover:scale-105 transition-all text-center">Scanner mes mails</a>
-            </section>
-            <section className="bg-white p-10 rounded-[3rem] border-4 border-black shadow-2xl flex flex-col justify-center items-center">
-                <div className="p-5 rounded-2xl bg-blue-500 text-white mb-6"><FileSearch size={40} /></div>
-                <h2 className="font-black uppercase text-2xl mb-4 text-center">VirusTotal</h2>
-                <a href="https://www.virustotal.com/" target="_blank" rel="noopener noreferrer" className="w-full py-5 bg-black text-white rounded-2xl font-black uppercase text-sm hover:bg-blue-600 transition-all shadow-xl text-center">Analyser un fichier</a>
-            </section>
-          </main>
-        </div>
-      </div>
+      <Helmet>
+        <title>Mon Bouclier Numérique | Protection & Apprentissage</title>
+      </Helmet>
+      {view === 'gateway' && <Gateway onChoose={setView} />}
+      {view === 'shield' && <ShieldSection onBack={() => setView('gateway')} />}
+      {view === 'academy' && <AcademySection onBack={() => setView('gateway')} />}
     </HelmetProvider>
   );
 }
