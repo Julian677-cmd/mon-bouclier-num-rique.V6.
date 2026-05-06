@@ -29,7 +29,7 @@ const UrgentAlert = () => (
   </a>
 );
 
-// --- 3. SCANNER PHISHING IA ---
+// --- 3. SCANNER PHISHING IA (Optimisé v2) ---
 const ScamAI = () => {
   const [text, setText] = useState("");
   const [analysis, setAnalysis] = useState<any>(null);
@@ -40,17 +40,33 @@ const ScamAI = () => {
     if (!text.trim() || text.length < 10) return;
     setLoading(true);
     try {
-      const classifier = await pipeline('text-classification', 'Xenova/distilbert-base-uncased-finetuned-sst-2-english');
+      // Modèle multilingue pour une meilleure détection en français
+      const classifier = await pipeline('text-classification', 'Xenova/distilbert-base-multilingual-cased-sentiments-student');
       const result = await classifier(text);
+      
+      // Heuristiques de détection de phishing françaises
+      const suspiciousPatterns = [
+        { regex: /(banque|ameli|impots|securite|verification|identifiants|compte|suspendu|bloqué)/i, label: "Admin/Banque" },
+        { regex: /(amende|gendarmerie|police|justice|infraction|payez)/i, label: "Juridique" },
+        { regex: /(colis|livraison|chronopost|ups|fedex|mondial relay|frais)/i, label: "Suivi Colis" },
+        { regex: /https?:\/\/(?!(www\.)?(gouv\.fr|service-public\.fr|caf\.fr|ameli\.fr|impots\.gouv\.fr))/i, label: "Lien non-officiel" },
+        { regex: /\d{1,2}[.,]\d{1,2}€/i, label: "Demande de Paiement" }
+      ];
+
+      const foundPatterns = suspiciousPatterns.filter(p => p.regex.test(text)).map(p => p.label);
+      const isNegative = result[0].label === 'negative' || result[0].label === 'NEGATIVE' || result[0].label === 'LABEL_0';
+      const isSuspect = isNegative || foundPatterns.length > 0;
       const score = Math.round(result[0].score * 100);
-      const isSuspect = result[0].label === 'NEGATIVE' || /(banque|ameli|urgent|impots|virement|lot|gagné|votre compte)/i.test(text);
 
       setAnalysis({
         text: text,
-        score: isSuspect ? score : 100 - score,
+        score: isSuspect ? Math.max(score, 80) : Math.min(score, 20),
         level: isSuspect ? "CRITIQUE" : "FAIBLE",
         color: isSuspect ? "text-red-600" : "text-green-600",
-        advice: isSuspect ? "🚨 Arnaque probable détectée par l'IA locale. Ne cliquez sur rien !" : "✅ Aucun danger immédiat détecté par l'IA.",
+        advice: isSuspect 
+          ? "🚨 Arnaque probable détectée par l'IA locale. Ne cliquez sur rien !" 
+          : "✅ Aucun danger immédiat détecté par l'IA.",
+        reasons: foundPatterns
       });
     } catch (e) { 
         setAnalysis({ score: 0, level: "ERREUR", color: "text-gray-500", advice: "L'IA n'a pas pu charger." });
@@ -90,6 +106,16 @@ const ScamAI = () => {
           <div className="p-5 bg-gray-100 rounded-2xl border-2 border-black">
             <p className={`font-black uppercase italic ${analysis.color}`}>{analysis.level} ({analysis.score}%)</p>
             <p className="font-bold text-sm mt-2">{analysis.advice}</p>
+            {analysis.reasons && analysis.reasons.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-black/10">
+                <p className="text-[10px] font-black uppercase text-gray-500 mb-1">Indices détectés :</p>
+                <div className="flex flex-wrap gap-1">
+                  {analysis.reasons.map((r: string, i: number) => (
+                    <span key={i} className="bg-red-50 text-red-700 text-[9px] px-2 py-0.5 rounded border border-red-200 font-bold">{r}</span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
           <button onClick={reportToN8N} disabled={reported} className="w-full mt-3 bg-red-100 text-red-600 py-3 rounded-xl font-black uppercase text-[10px] flex items-center justify-center gap-2 hover:bg-red-200 transition-all">
             <Send size={14} /> {reported ? "Signalé à n8n !" : "Signaler cette arnaque"}
@@ -106,7 +132,7 @@ const DeepfakeAlert = () => (
     <div className="absolute top-0 right-0 p-4 opacity-10"><VideoOff size={140} /></div>
     <div className="bg-red-500 text-white p-3 rounded-xl inline-block w-fit mb-4 shadow-lg relative z-10"><VideoOff size={28}/></div>
     <h2 className="font-black italic uppercase text-2xl mb-2 relative z-10">Alerte Deepfake</h2>
-    <p className="text-sm font-bold opacity-90 mb-6 relative z-10">L'IA peut imiter les voix et les visages (Hypertrucage). Soyez vigilant lors de vos appels.</p>
+    <p className="text-sm font-bold opacity-90 mb-6 relative z-10">L'IA peut imiter les voix et les visages (Hypertrucage). Soyez vigilants lors de vos appels.</p>
     <a href="https://www.cnil.fr/fr/hypertrucage-deepfake" target="_blank" rel="noopener noreferrer" className="bg-red-500 text-white py-4 rounded-xl font-black uppercase text-center hover:bg-red-600 transition-all shadow-xl relative z-10 active:scale-95">Guide de la CNIL</a>
   </section>
 );
@@ -132,7 +158,7 @@ const IdentityPhantom = () => {
   );
 };
 
-// --- 6. TESTEUR DE MOT DE PASSE (Avec Option Phrase de Passe) ---
+// --- 6. TESTEUR DE MOT DE PASSE ---
 const PasswordTool = () => {
   const [pass, setPass] = useState("");
   const [generated, setGenerated] = useState("");
@@ -148,7 +174,7 @@ const PasswordTool = () => {
   const strength = getStrength(pass);
 
   const generatePass = () => {
-    const chars = "ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%^&*()";
+    const chars = "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%^&*()";
     const array = new Uint32Array(16); window.crypto.getRandomValues(array);
     let res = ""; for (let i = 0; i < 16; i++) { res += chars.charAt(array[i] % chars.length); }
     setGenerated(res);
@@ -191,13 +217,14 @@ const VeraModule = () => (
   </section>
 );
 
-// --- 8. NEWS FEED (Fixed for robustness) ---
+// --- 8. NEWS FEED ---
 const NewsFeed = () => {
   const [news, setNews] = useState<any[]>([]);
   const [error, setError] = useState(false);
   useEffect(() => {
     fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://www.cert.ssi.gouv.fr/feed/')}`)
-      .then(res => res.json()).then(data => {
+      .then(res => res.json())
+      .then(data => {
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(data.contents, "text/xml");
         const items = Array.from(xmlDoc.querySelectorAll("item")).slice(0, 3).map(el => ({
@@ -210,7 +237,7 @@ const NewsFeed = () => {
   }, []);
   return (
     <section className="bg-white p-6 md:p-8 rounded-[2.5rem] border-4 border-black shadow-2xl h-full text-left">
-      <h2 className="font-black uppercase italic text-xl mb-6 flex items-center gap-2"><Radio className="text-red-500 animate-pulse" /> Alertes ANSSI</h2>
+      <h2 className="font-black uppercase italic text-2xl mb-6 flex items-center gap-2"><Radio className="text-red-500 animate-pulse" /> Alertes ANSSI</h2>
       <div className="space-y-4">
         {news.length > 0 ? news.map((item, i) => (
           <a key={i} href={item.link} target="_blank" rel="noopener noreferrer" className="block p-4 bg-gray-50 border-2 border-black rounded-2xl hover:bg-yellow-50 transition-all">
@@ -223,7 +250,7 @@ const NewsFeed = () => {
   );
 };
 
-// --- 9. CYBER QUIZ (Interactif) ---
+// --- 9. CYBER QUIZ ---
 const CyberQuiz = () => {
   const [step, setStep] = useState(0);
   const [score, setScore] = useState(0);
@@ -317,7 +344,7 @@ function App() {
               <div className="bg-black p-3 rounded-2xl text-yellow-400 shadow-xl"><ShieldCheck size={32} /></div>
               <h1 className="text-3xl md:text-4xl font-black uppercase italic tracking-tighter leading-none text-left">Mon Bouclier<br/><span className="text-yellow-500 text-2xl md:text-3xl">Numérique</span></h1>
             </div>
-            <a href="/Bouclier%20Cyber%20.apk" download className="bg-[#ffde59] px-8 py-4 rounded-2xl font-black uppercase border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all text-sm active:translate-x-[0px] shadow-none">📥 App Android</a>
+            <a href="/Bouclier%20Cyber%20.apk" download className="bg-[#ffde59] px-8 py-4 rounded-2xl font-black uppercase border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all text-sm active:translate-x-[0px] shadow-none">📲 App Android</a>
           </header>
           <Breadcrumbs />
           <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -339,7 +366,7 @@ function App() {
             <section className="lg:col-span-3 bg-red-600 p-8 md:p-14 rounded-[3rem] text-white flex flex-col md:flex-row items-center justify-between gap-10 shadow-2xl relative overflow-hidden border-4 border-black text-left">
               <div className="absolute top-0 right-0 p-10 opacity-10"><Fingerprint size={200}/></div>
               <div className="relative z-10">
-                <h2 className="font-black uppercase italic text-4xl md:text-5xl">Fuite de données ?</h2>
+                <h2 className="font-black uppercase italic text-4xl md:text-5xl">Fuite de vos données ?</h2>
                 <p className="text-lg font-black uppercase text-red-200 tracking-tight">Vérifiez si vos mails sont dans une base piratée.</p>
               </div>
               <a href="https://haveibeenpwned.com/" target="_blank" rel="noopener noreferrer" className="px-16 py-6 bg-white text-red-600 rounded-[2rem] font-black uppercase text-lg relative z-10 shadow-[8px_8px_0px_0px_rgba(0,0,0,0.2)] hover:scale-105 transition-all text-center">Scanner mes mails</a>
@@ -347,7 +374,7 @@ function App() {
             <section className="bg-white p-10 rounded-[3rem] border-4 border-black shadow-2xl flex flex-col justify-center items-center">
                 <div className="p-5 rounded-2xl bg-blue-500 text-white mb-6"><FileSearch size={40} /></div>
                 <h2 className="font-black uppercase text-2xl mb-4 text-center">VirusTotal</h2>
-                <a href="https://www.virustotal.com/" target="_blank" rel="noopener noreferrer" className="w-full py-5 bg-black text-white rounded-2xl font-black uppercase text-sm hover:bg-blue-600 transition-all shadow-xl">Analyser un fichier</a>
+                <a href="https://www.virustotal.com/" target="_blank" rel="noopener noreferrer" className="w-full py-5 bg-black text-white rounded-2xl font-black uppercase text-sm hover:bg-blue-600 transition-all shadow-xl text-center">Analyser un fichier</a>
             </section>
           </main>
         </div>
