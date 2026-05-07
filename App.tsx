@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
-import { 
-  ShieldCheck, Loader2, Globe, Trophy, Key, Fingerprint, ShieldAlert, 
+import {
+  ShieldCheck, Loader2, Globe, Trophy, Key, Fingerprint, ShieldAlert,
   FileSearch, Radio, ChevronRight, MessageSquare, CheckCircle2, XCircle, Info, Send, VideoOff, Type, GraduationCap, Shield
 } from 'lucide-react';
 import { pipeline } from '@xenova/transformers';
@@ -23,8 +23,8 @@ const Gateway = ({ onChoose }) => (
       MON BOUCLIER<br/><span className="text-yellow-500">NUMÉRIQUE</span>
     </h1>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl w-full">
-      <button 
-        onClick={() => onChoose('shield')} 
+      <button
+        onClick={() => onChoose('shield')}
         className="group bg-black text-white p-10 rounded-[3rem] border-4 border-black shadow-[15px_15px_0px_0px_#ffde59] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex flex-col items-center text-center gap-4"
       >
         <Shield size={48} className="group-hover:scale-110 transition-transform text-yellow-400" />
@@ -33,9 +33,9 @@ const Gateway = ({ onChoose }) => (
           <p className="text-xs font-bold opacity-70 mt-2">OUTILS DE PROTECTION IA & SÉCURITÉ</p>
         </div>
       </button>
-      
-      <button 
-        onClick={() => onChoose('academy')} 
+
+      <button
+        onClick={() => onChoose('academy')}
         className="group bg-white text-black p-10 rounded-[3rem] border-4 border-black shadow-[15px_15px_0px_0px_#000] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex flex-col items-center text-center gap-4"
       >
         <GraduationCap size={48} className="group-hover:scale-110 transition-transform text-blue-600" />
@@ -45,14 +45,14 @@ const Gateway = ({ onChoose }) => (
         </div>
       </button>
     </div>
-    <p className="mt-12 font-black uppercase text-[10px] tracking-widest opacity-30 italic">v6.0 - Automatisé par Cyber Assistant</p>
+    <p className="mt-12 font-black uppercase text-[10px] tracking-widest opacity-30 italic">v6.1 - Automatisé par Cyber Assistant</p>
   </div>
 );
 
 // --- 2. BANNIERE ALERTE URGENTE ---
 const UrgentAlert = () => (
-  <a 
-    href="https://www.cybermalveillance.gouv.fr/tous-nos-contenus/actualites/alertecyber-faille-securite-critique-adobe-acrobat-acrobat-reader" 
+  <a
+    href="https://www.cybermalveillance.gouv.fr/tous-nos-contenus/actualites/alertecyber-faille-securite-critique-adobe-acrobat-acrobat-reader"
     target="_blank" rel="noopener noreferrer"
     className="block bg-red-600 text-white py-3 px-4 text-center font-black uppercase text-[10px] tracking-widest animate-pulse hover:bg-red-700"
   >
@@ -73,9 +73,21 @@ const ShieldSection = ({ onBack }) => {
       const classifier = await pipeline('text-classification', 'Xenova/distilbert-base-uncased-finetuned-sst-2-english');
       const result = await classifier(text);
       const score = Math.round(result[0].score * 100);
-      const isSuspect = result[0].label === 'NEGATIVE' || /(banque|ameli|urgent|impots|virement|lot|gagné)/i.test(text);
-      setAnalysis({ score: isSuspect ? score : 100-score, level: isSuspect ? "CRITIQUE" : "FAIBLE", color: isSuspect ? "text-red-600" : "text-green-600", advice: isSuspect ? "🚨 DANGER : Arnaque probable !" : "✅ SAIN : Pas de menace détectée." });
-    } catch (e) { setAnalysis({ level: "ERREUR", color: "text-gray-500", advice: "IA indisponible." }); } finally { setLoading(false); }
+      // REGEX AMÉLIORÉE : Plus de termes pour les arnaques modernes (CPF, ANTAI, Colis, etc.)
+      const scamTerms = /(banque|ameli|urgent|impots|virement|lot|gagné|facture|paiement|suspens|colis|livraison|compte|bloqué|sécurité|vérification|connecter|identifiants|remboursement|amende|antai|cpf|netflix|disney|caf|impot|gouv|chronopost|ups|mondial)/i;
+      const isSuspect = result[0].label === 'NEGATIVE' || scamTerms.test(text);
+      setAnalysis({ 
+        score: isSuspect ? score : 100-score, 
+        level: isSuspect ? "CRITIQUE" : "FAIBLE", 
+        color: isSuspect ? "text-red-600" : "text-green-600", 
+        advice: isSuspect ? "🚨 DANGER : Arnaque probable !" : "✅ SAIN : Pas de menace détectée." 
+      });
+    } catch (e) {
+      console.error("AI Analysis Error:", e);
+      setAnalysis({ level: "ERREUR", color: "text-gray-500", advice: "IA indisponible." });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -106,7 +118,7 @@ const ShieldSection = ({ onBack }) => {
               <button onClick={analyzeReal} disabled={loading} className="w-full bg-black text-white py-4 rounded-2xl font-black uppercase text-xs hover:bg-yellow-400 hover:text-black transition-all">
                 {loading ? <Loader2 className="animate-spin mx-auto" /> : "Analyser"}
               </button>
-              {analysis && <div className="mt-4 p-4 bg-gray-100 rounded-xl border-2 border-black font-black uppercase italic text-xs ${analysis.color}">{analysis.level}: {analysis.advice}</div>}
+              {analysis && <div className={`mt-4 p-4 bg-gray-100 rounded-xl border-2 border-black font-black uppercase italic text-xs ${analysis.color}`}>{analysis.level}: {analysis.advice}</div>}
            </Card>
 
            <IdentityPhantom />
@@ -115,7 +127,7 @@ const ShieldSection = ({ onBack }) => {
            <PasswordTool />
            <CyberQuiz />
            <SecurityChecklist />
-           
+
            <Card className="lg:col-span-3 bg-red-600 text-white border-red-900 flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="text-left">
                 <h2 className="text-3xl font-black uppercase italic">Fuites de données ?</h2>
@@ -129,7 +141,7 @@ const ShieldSection = ({ onBack }) => {
   );
 };
 
-// --- 4. SECTION ACADEMIE (NOUVEAU) ---
+// --- 4. SECTION ACADEMIE ---
 const AcademySection = ({ onBack }) => (
   <div className="min-h-screen bg-black text-white p-10 flex flex-col items-center animate-in slide-in-from-left duration-500">
     <header className="w-full max-w-4xl flex justify-between items-center mb-20">
@@ -151,13 +163,16 @@ const AcademySection = ({ onBack }) => (
   </div>
 );
 
-// --- MODULES EXISTANTS (Optimisés) ---
+// --- MODULES OPTIMISÉS ---
 const IdentityPhantom = () => {
   const [pseudo, setPseudo] = useState("");
   const gen = () => {
-    const p = ["Neon", "Cyber", "Void", "Astro"];
-    const c = ["Wolf", "Spectre", "Kernel", "Phantom"];
-    setPseudo(`${p[Math.floor(Math.random()*p.length)]}_${c[Math.floor(Math.random()*c.length)]}_${Math.floor(Math.random()*99)}`);
+    const p = ["Neon", "Cyber", "Void", "Astro", "Shadow", "Alpha", "Omega", "Digital", "Silent", "Ghost", "Signal", "Byte", "Logic"];
+    const c = ["Wolf", "Spectre", "Kernel", "Phantom", "Blade", "Runner", "Watcher", "Seeker", "Pilot", "Core", "Node", "Vault"];
+    const prefix = p[Math.floor(Math.random()*p.length)];
+    const suffix = c[Math.floor(Math.random()*c.length)];
+    const num = Math.floor(Math.random()*999);
+    setPseudo(`${prefix}_${suffix}_${num}`);
   };
   return (
     <Card className="bg-yellow-400 text-black">
@@ -181,7 +196,9 @@ const NewsFeed = () => {
   const [news, setNews] = useState<any[]>([]);
   useEffect(() => {
     fetch(`https://api.rss2json.com/v1/api.json?rss_url=https://www.cert.ssi.gouv.fr/feed/&count=3&t=${Date.now()}`)
-      .then(res => res.json()).then(data => { if (data.items) setNews(data.items); });
+      .then(res => res.json())
+      .then(data => setNews(data.items || []))
+      .catch(() => setNews([]));
   }, []);
   return (
     <Card>
@@ -200,12 +217,14 @@ const PasswordTool = () => {
   const [res, setRes] = useState("");
   const gen = () => {
     if(mode === 'pass') {
-      const c = "ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%^&*()";
-      let r = ""; for(let i=0; i<16; i++) r += c.charAt(Math.floor(Math.random()*c.length));
+      const c = "ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz0123456789!@#$%^&*()";
+      let r = "";
+      for(let i=0; i<16; i++) r += c.charAt(Math.floor(Math.random()*c.length));
       setRes(r);
     } else {
-      const w = ["ocean", "vitesse", "calme", "argent", "foret", "secret"];
-      let r = []; for(let i=0; i<4; i++) r.push(w[Math.floor(Math.random()*w.length)]);
+      const w = ["ocean", "vitesse", "calme", "argent", "foret", "secret", "voyage", "etoile", "montagne", "riviere", "ombre", "lumiere", "songe", "memoire", "espace", "temps", "force", "esprit", "vision"];
+      let r = [];
+      for(let i=0; i<4; i++) r.push(w[Math.floor(Math.random()*w.length)]);
       setRes(r.join("-"));
     }
   };
@@ -222,34 +241,95 @@ const PasswordTool = () => {
   );
 };
 
-const CyberQuiz = () => (
-  <Card className="bg-purple-600 text-white border-purple-900">
-     <h2 className="text-xl font-black uppercase mb-4">Cyber Quiz</h2>
-     <p className="font-bold text-sm mb-6">Testez vos connaissances en 4 questions.</p>
-     <button className="w-full bg-white text-purple-600 py-3 rounded-xl font-black uppercase text-xs">Lancer</button>
-  </Card>
-);
+const CyberQuiz = () => {
+  const [step, setStep] = useState(0);
+  const [score, setScore] = useState(0);
+  const questions = [
+    { q: "Le 2FA est-il indispensable ?", a: true },
+    { q: "Un mot de passe '123456' est sûr ?", a: false },
+    { q: "Le HTTPS garantit la sécurité ?", a: false }
+  ];
+  
+  const handle = (val: boolean) => {
+    if(val === questions[step].a) setScore(score + 1);
+    setStep(step + 1);
+  };
 
-const SecurityChecklist = () => (
-  <Card className="bg-green-500 text-white border-green-900">
-     <h2 className="text-xl font-black uppercase mb-4">Checklist</h2>
-     <div className="h-2 bg-black/20 rounded-full overflow-hidden mb-4"><div className="h-full bg-white w-[20%]" /></div>
-     <button className="w-full bg-black text-white py-3 rounded-xl font-black uppercase text-xs">Ouvrir</button>
-  </Card>
-);
+  return (
+    <Card className="bg-purple-600 text-white border-purple-900">
+       <h2 className="text-xl font-black uppercase mb-4">Cyber Quiz</h2>
+       {step < questions.length ? (
+         <div className="space-y-4">
+           <p className="font-bold text-xs uppercase">{questions[step].q}</p>
+           <div className="flex gap-2">
+             <button onClick={() => handle(true)} className="flex-1 bg-green-500 py-2 rounded-xl font-black">OUI</button>
+             <button onClick={() => handle(false)} className="flex-1 bg-red-500 py-2 rounded-xl font-black">NON</button>
+           </div>
+         </div>
+       ) : (
+         <div className="text-center">
+            <p className="font-black text-2xl mb-2">{score}/{questions.length}</p>
+            <button onClick={() => {setStep(0); setScore(0);}} className="text-[10px] font-black uppercase underline">Recommencer</button>
+         </div>
+       )}
+    </Card>
+  );
+};
+
+const SecurityChecklist = () => {
+  const [items, setItems] = useState([
+    { id: 1, text: "Mots de passe uniques", checked: false },
+    { id: 2, text: "2FA activé partout", checked: false },
+    { id: 3, text: "Mises à jour faites", checked: false },
+    { id: 4, text: "Sauvegardes OK", checked: false }
+  ]);
+  const toggle = (id: number) => {
+    setItems(items.map(i => i.id === id ? { ...i, checked: !i.checked } : i));
+  };
+  const progress = Math.round((items.filter(i => i.checked).length / items.length) * 100);
+
+  return (
+    <Card className="bg-green-500 text-white border-green-900">
+       <h2 className="text-xl font-black uppercase mb-4">Checklist</h2>
+       <div className="h-2 bg-black/20 rounded-full overflow-hidden mb-4">
+         <div className="h-full bg-white transition-all duration-500" style={{ width: `${progress}%` }} />
+       </div>
+       <div className="space-y-2">
+         {items.map(i => (
+           <button key={i.id} onClick={() => toggle(i.id)} className={`w-full text-left p-2 rounded-lg text-[8px] font-black uppercase flex items-center gap-2 border-2 transition-all ${i.checked ? 'bg-white text-green-600 border-white' : 'border-green-700/50'}`}>
+             {i.checked ? <CheckCircle2 size={12}/> : <div className="w-3 h-3 rounded-full border border-current"/>}
+             {i.text}
+           </button>
+         ))}
+       </div>
+    </Card>
+  );
+};
 
 function App() {
   const [view, setView] = useState<'gateway' | 'shield' | 'academy'>('gateway');
-  
+
   useEffect(() => {
-    const s = document.createElement("script"); s.src = "https://embed.tawk.to/69ee706ebd68fb1c32a82772/1jn5mech0"; s.async = true; document.head.appendChild(s);
+    const scriptId = 'tawk-script';
+    if (!document.getElementById(scriptId)) {
+      const s = document.createElement("script");
+      s.id = scriptId;
+      s.src = "https://embed.tawk.to/69ee706ebd68fb1c32a82772/1jn5mech0";
+      s.async = true;
+      s.charset = 'UTF-8';
+      document.head.appendChild(s);
+    }
   }, []);
 
   return (
     <HelmetProvider>
       <Helmet>
         <title>Mon Bouclier Numérique | Protection & Apprentissage</title>
+        <meta name="description" content="Votre portail personnel pour la cybersécurité, la protection IA et l'apprentissage du hacking éthique." />
+        <meta name="keywords" content="cybersécurité, protection, IA, hacking éthique, sécurité numérique, formation" />
+        <meta name="author" content="Cyber Assistant" />
       </Helmet>
+
       {view === 'gateway' && <Gateway onChoose={setView} />}
       {view === 'shield' && <ShieldSection onBack={() => setView('gateway')} />}
       {view === 'academy' && <AcademySection onBack={() => setView('gateway')} />}
