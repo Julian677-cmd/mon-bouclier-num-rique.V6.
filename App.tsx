@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import {
   ShieldCheck, Loader2, Globe, Trophy, Key, Fingerprint, ShieldAlert,
-  FileSearch, Radio, ChevronRight, MessageSquare, CheckCircle2, XCircle, Info, Send, VideoOff, Type, GraduationCap, Shield
+  FileSearch, Radio, ChevronRight, MessageSquare, CheckCircle2, XCircle, Info, Send, VideoOff, Type, GraduationCap, Shield, Copy, Check
 } from 'lucide-react';
 import { pipeline } from '@xenova/transformers';
 
@@ -45,7 +45,7 @@ const Gateway = ({ onChoose }) => (
         </div>
       </button>
     </div>
-    <p className="mt-12 font-black uppercase text-[10px] tracking-widest opacity-30 italic">v6.1 - Automatisé par Cyber Assistant</p>
+    <p className="mt-12 font-black uppercase text-[10px] tracking-widest opacity-30 italic">v6.2 - Automatisé par Cyber Assistant</p>
   </div>
 );
 
@@ -53,7 +53,8 @@ const Gateway = ({ onChoose }) => (
 const UrgentAlert = () => (
   <a
     href="https://www.cybermalveillance.gouv.fr/tous-nos-contenus/actualites/alertecyber-faille-securite-critique-adobe-acrobat-acrobat-reader"
-    target="_blank" rel="noopener noreferrer"
+    target="_blank"
+    rel="noopener noreferrer"
     className="block bg-red-600 text-white py-3 px-4 text-center font-black uppercase text-[10px] tracking-widest animate-pulse hover:bg-red-700"
   >
     🚨 Alerte Critique : Faille Adobe Acrobat & Linux Root. Cliquez pour vous protéger !
@@ -100,7 +101,7 @@ const ShieldSection = ({ onBack }) => {
              <div className="bg-black p-2 rounded-xl text-yellow-400"><ShieldCheck size={24} /></div>
              <h1 className="text-2xl font-black uppercase italic">Le Bouclier</h1>
           </div>
-          <a href="/Bouclier%20Cyber%20.apk" download className="bg-[#ffde59] px-6 py-3 rounded-2xl font-black uppercase border-4 border-black shadow-lg text-xs">📥 App Android</a>
+          <a href="/Bouclier%20Cyber%20.apk" download className="bg-[#ffde59] px-6 py-3 rounded-2xl font-black uppercase border-4 border-black shadow-lg text-xs">🚀 App Android</a>
         </header>
 
         <main className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -116,7 +117,7 @@ const ShieldSection = ({ onBack }) => {
               <h2 className="text-xl font-black uppercase mb-4 flex items-center gap-2"><ShieldAlert className="text-yellow-500"/> Scanner IA</h2>
               <textarea className="w-full h-32 p-4 bg-gray-50 border-2 border-black rounded-2xl font-bold text-sm outline-none mb-4" placeholder="Collez ici..." value={text} onChange={(e) => setText(e.target.value)} />
               <button onClick={analyzeReal} disabled={loading} className="w-full bg-black text-white py-4 rounded-2xl font-black uppercase text-xs hover:bg-yellow-400 hover:text-black transition-all">
-                {loading ? <Loader2 className="animate-spin mx-auto" /> : "Analyser"}
+                {loading ? <Loader2 size={16} className="animate-spin mx-auto" /> : "Analyser"}
               </button>
               {analysis && <div className={`mt-4 p-4 bg-gray-100 rounded-xl border-2 border-black font-black uppercase italic text-xs ${analysis.color}`}>{analysis.level}: {analysis.advice}</div>}
            </Card>
@@ -130,7 +131,7 @@ const ShieldSection = ({ onBack }) => {
 
            <Card className="lg:col-span-3 bg-red-600 text-white border-red-900 flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="text-left">
-                <h2 className="text-3xl font-black uppercase italic">Fuites de données ?</h2>
+               <h2 className="text-3xl font-black uppercase italic tracking-tighter mb-2">Fuites de données ?</h2>
                 <p className="font-bold opacity-80">Vérifiez si vos comptes sont compromis.</p>
               </div>
               <a href="https://haveibeenpwned.com/" target="_blank" rel="noopener noreferrer" className="bg-white text-red-600 px-10 py-4 rounded-2xl font-black uppercase shadow-xl">Scanner</a>
@@ -215,9 +216,12 @@ const NewsFeed = () => {
 const PasswordTool = () => {
   const [mode, setMode] = useState<'pass' | 'phrase'>('pass');
   const [res, setRes] = useState("");
+  const [copied, setCopied] = useState(false);
+
   const gen = () => {
+    setCopied(false);
     if(mode === 'pass') {
-      const c = "ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz0123456789!@#$%^&*()";
+      const c = "ABCDEFGHIJKLMNO PQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
       let r = "";
       for(let i=0; i<16; i++) r += c.charAt(Math.floor(Math.random()*c.length));
       setRes(r);
@@ -228,6 +232,14 @@ const PasswordTool = () => {
       setRes(r.join("-"));
     }
   };
+
+  const copy = () => {
+    if(!res) return;
+    navigator.clipboard.writeText(res);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <Card className="bg-black text-white border-zinc-800">
       <h2 className="text-xl font-black uppercase mb-4 flex items-center gap-2"><Key size={18} className="text-blue-400"/> Coffre-Fort</h2>
@@ -236,7 +248,15 @@ const PasswordTool = () => {
         <button onClick={() => setMode('phrase')} className={`flex-1 py-1 rounded-lg text-[8px] font-black uppercase border-2 ${mode === 'phrase' ? 'bg-blue-600 border-blue-400' : 'border-zinc-700 opacity-50'}`}>Phrase</button>
       </div>
       <button onClick={gen} className="w-full bg-blue-600 py-3 rounded-xl font-black uppercase text-xs">Générer</button>
-      {res && <div className="mt-3 p-3 bg-zinc-800 text-blue-300 rounded-xl font-mono text-[10px] text-center border border-blue-500/30">{res}</div>}
+      {res && (
+        <div 
+          onClick={copy}
+          className="mt-3 p-3 bg-zinc-800 text-blue-300 rounded-xl font-mono text-[10px] text-center border border-blue-500/30 cursor-pointer hover:bg-zinc-700 transition-colors flex items-center justify-center gap-2 group"
+        >
+          <span className="break-all">{res}</span>
+          {copied ? <Check size={12} className="text-green-400" /> : <Copy size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />}
+        </div>
+      )}
     </Card>
   );
 };
