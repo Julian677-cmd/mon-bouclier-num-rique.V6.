@@ -1,13 +1,18 @@
-# Mon Bouclier Numérique
-
-Site d'outils de cybersécurité gratuits spécialisé dans la protection contre le phishing et la robustesse des accès.
-
-## Outils Disponibles
-- Scanner de Scam : Analyse sémantique de SMS et Emails suspects pour détecter les tentatives d'hameçonnage.
-- Coffre-fort : Testeur de robustesse de mot de passe (local) et générateur sécurisé.
-- Alertes CERT-FR : Flux de vulnérabilités en temps réel fourni par l'ANSSI.
-
-## Navigation
-- Accueil : https://project-sokwk.vercel.app
-- Analyse Fichier : Redirection vers VirusTotal
-- Vérification Fuite : Redirection vers HaveIBeenPwned
+IyBNb24gQm91Y2xpZXIgTnVtw6lyaXF1ZQ0KDQpTaXRlIGQnb3V0aWxzIGRl
+IGN5YmVyc8OpY3VyaXTDqSBncmF0dWl0cyBzcMOpY2lhbGlzw6kgZGFucyBs
+YSBwcm90ZWN0aW9uIGNvbnRyZSBsZSBwaGlzaGluZyBldCBsYSByb2J1c3Rl
+c3NlIGRlcyBhY2PDqHMuDQoNCiMjIE91dGlscyBEaXNwb25pYmxlcw0KLSBT
+Y2FubmVyIGRlIFNjYW0gOiBBbmFseXNlIHPDqW1hbnRpcXVlIGRlIFNNUyBl
+dCBFbWFpbHMgc3VzcGVjdHMgcG91ciBkw6l0ZWN0ZXIgbGVzIHRlbnRhdGl2
+ZXMgZCdoYW1lw6dvbm5hZ2UuDQotIENvZmZyZS1mb3J0IDogVGVzdGV1ciBk
+ZSByb2J1c3Rlc3NlIGRlIG1vdCBkZSBwYXNzZSAobG9jYWwpIGV0IGfDqW7D
+qXJhdGV1ciBzw6ljdXJpc8OpLg0KLSBBbGVydGVzIENFUlQtRlIgOiBGbHV4
+IGRlIHZ1bG7DqXJhYmlsaXTDqXMgZW4gdGVtcHMgcsOpZWwgZm91cm5pIHBh
+ciBsJ0FOU1NJLg0KLSBHdWlkZSBQcml2YXRlIDogQ29uc2VpbHMgcHLDqXRz
+IMOgIGwnZW1wbG9pIHBvdXIgc8OpY3VyaXNlciBJbnN0YWdyYW0sIFNuYXAs
+IFRpa1Rvay4NCg0KIyMgU8OpY3VyaXTDqQ0KLSBDU1AgOiBQb2xpdGlxdWUg
+ZGUgU8OpY3VyaXTDqSBkZSBDb250ZW51IHN0cmljdGUgYWN0aXbDqWUuDQoN
+CiMjIE5hdmlnYXRpb24NCi0gQWNjdWVpbCA6IGh0dHBzOi8vcHJvamVjdC1z
+b2t3ay52ZXJjZWwuYXBwDQotIEFuYWx5c2UgRmljaGllciA6IFJlZGlyZWN0
+aW9uIHZlcnMgVmlydXNUb3RhbA0KLSBWw6lyaWZpY2F0aW9uIEZ1aXRlIDog
+UmVkaXJlY3Rpb24gdmVycyBIYXZlSUJlZW5Qd25lZA0K
