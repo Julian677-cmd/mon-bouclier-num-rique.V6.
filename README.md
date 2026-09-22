@@ -1,8 +1,10 @@
 # Mon Bouclier Numérique
 
-site pour amélioré sa sécurité en ligne
+Site pour améliorer sa sécurité en ligne.
+
+## 📚 Guides Pédagogiques
+- [Guide de Confidentialité](./GUIDE_CONFIDENTIALITE.md)
+- [Les Dark Patterns](./GUIDE_DARK_PATTERNS.md) 🆕
 
 ---
-*Dernière mise à jour automatique effectuée par Cyber.*
-
-ID de build forcé : 2026-04-28-18-16
+*Dernière mise à jour automatique effectuée par Cyber le 22 Septembre 2026.*
